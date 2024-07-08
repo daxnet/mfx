@@ -126,7 +126,10 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
         if (Y >= viewport.Height - Height)
             result |= Boundary.Bottom;
 
-        Publish(new BoundaryHitMessage(result));
+        if (result != Boundary.None)
+        {
+            Publish(new BoundaryHitMessage(result));
+        }
     }
 
     #endregion Public Methods
