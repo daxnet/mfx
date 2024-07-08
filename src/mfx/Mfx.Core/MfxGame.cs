@@ -198,7 +198,7 @@ public class MfxGame : Game
             return;
 
         var cur = FirstScene;
-        while (cur.Next is not null)
+        while (cur is not null)
         {
             cur.Load(Content);
             cur = cur.Next;
