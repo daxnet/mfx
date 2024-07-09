@@ -29,36 +29,20 @@
 // SOFTWARE.
 // =============================================================================
 
-namespace Mfx.Core;
+using Mfx.Core;
 
-/// <summary>
-///     Represents the boundary type that a component has hit on.
-/// </summary>
-[Flags]
-public enum Boundary
+namespace Mfx.Samples.Particles;
+
+public class ParticleGame : MfxGame
 {
-    /// <summary>
-    ///     Indicates that the component hasn't reached the boundary.
-    /// </summary>
-    None = 0,
+    #region Public Constructors
 
-    /// <summary>
-    ///     Indicates that the component has reached the boundary at the top.
-    /// </summary>
-    Top = 1,
+    public ParticleGame()
+        : base(MfxGameSettings.DefaultWithTitle("Particles"))
+    {
+        FirstScene = AddScene<ParticleScene>();
+        AddScene<EndingScene>(FirstScene);
+    }
 
-    /// <summary>
-    ///     Indicates that the component has reached the boundary at the left side.
-    /// </summary>
-    Left = 2,
-
-    /// <summary>
-    ///     Indicates that the component has reached the boundary at the right side.
-    /// </summary>
-    Right = 4,
-
-    /// <summary>
-    ///     Indicates that the component has readched the boundary at the bottom.
-    /// </summary>
-    Bottom = 8
+    #endregion Public Constructors
 }

@@ -38,8 +38,10 @@ public class FlyingObjectGame : MfxGame
     #region Public Constructors
 
     public FlyingObjectGame()
+        : base(MfxGameSettings.DefaultWithTitle("Flying Object"))
     {
-        FirstScene = AddScene<FlyingObjectMainScene>();
+        FirstScene = AddScene<FlyingObjectScene>();
+        AddScene<EndingScene>(FirstScene);
     }
 
     #endregion Public Constructors

@@ -35,35 +35,12 @@ using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Mfx.Samples.FlyingObject;
 
-internal sealed class FlyingObjectMainScene(MfxGame game) : Scene(game, Color.Black)
+internal sealed class FlyingObjectScene(MfxGame game) : Scene(game, Color.Black)
 {
-    #region Public Methods
-
-    public override void Load(ContentManager contentManager)
-    {
-        var screenWidth = Game.GraphicsDevice.Viewport.Width;
-        var screenHeight = Game.GraphicsDevice.Viewport.Height;
-        _spriteTexture = contentManager.Load<Texture2D>("dog");
-
-        for (var i = 0; i < 5; i++)
-        {
-            var initialX = _rnd.Next(1, screenWidth - _spriteTexture.Width);
-            var initialY = _rnd.Next(1, screenHeight - _spriteTexture.Height);
-            var initialDeltaX = _rnd.Next(5) + 1;
-            var initialDeltaY = _rnd.Next(5) + 1;
-
-            var objectSprite = new FlyingObjectSprite(this, _spriteTexture, initialX, initialY, initialDeltaX,
-                initialDeltaY);
-
-            Add(objectSprite);
-        }
-    }
-
-    #endregion Public Methods
-
     #region Protected Methods
 
     protected override void Dispose(bool disposing)
@@ -81,11 +58,45 @@ internal sealed class FlyingObjectMainScene(MfxGame game) : Scene(game, Color.Bl
 
     #region Private Fields
 
+    private const int NumberOfSprites = 3;
+
     // ReSharper disable once InconsistentNaming
     private static readonly Random _rnd = new(DateTime.UtcNow.Millisecond);
 
     private bool _disposed;
+
     private Texture2D? _spriteTexture;
 
     #endregion Private Fields
+
+    #region Public Methods
+
+    public override void Load(ContentManager contentManager)
+    {
+        var screenWidth = Game.GraphicsDevice.Viewport.Width;
+        var screenHeight = Game.GraphicsDevice.Viewport.Height;
+        _spriteTexture = contentManager.Load<Texture2D>("dog");
+
+        for (var i = 0; i < NumberOfSprites; i++)
+        {
+            var initialX = _rnd.Next(1, screenWidth - _spriteTexture.Width);
+            var initialY = _rnd.Next(1, screenHeight - _spriteTexture.Height);
+            var initialDeltaX = _rnd.Next(5) + 1;
+            var initialDeltaY = _rnd.Next(5) + 1;
+
+            var objectSprite = new FlyingObjectSprite(this, _spriteTexture, initialX, initialY, initialDeltaX,
+                initialDeltaY);
+
+            Add(objectSprite);
+        }
+    }
+
+    public override void Update(GameTime gameTime)
+    {
+        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape)) End();
+
+        base.Update(gameTime);
+    }
+
+    #endregion Public Methods
 }

@@ -103,7 +103,7 @@ public class MfxGame : Game
 
     #region Protected Methods
 
-    protected TScene AddScene<TScene>(TScene? previousScene = null)
+    protected TScene AddScene<TScene>(IScene? previousScene = null)
         where TScene : class, IScene
     {
         var constructors = from p in typeof(TScene).GetConstructors()

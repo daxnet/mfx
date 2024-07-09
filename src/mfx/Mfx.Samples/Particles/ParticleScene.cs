@@ -30,89 +30,70 @@
 // =============================================================================
 
 using System;
+using System.Linq;
+using Mfx.Core;
 using Mfx.Core.Physics;
 using Mfx.Core.Scenes;
-using Mfx.Core.Sprites;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
-namespace Mfx.Samples.FlyingObject;
+namespace Mfx.Samples.Particles;
 
-internal sealed class FlyingObjectSprite : Sprite
+internal sealed class ParticleScene : Scene
 {
+    #region Private Fields
+
+    private const int CenterAreaHeight = 16;
+    private const int CenterAreaWidth = 20;
+
+    // ReSharper disable once InconsistentNaming
+    private static readonly Random _rnd = new(DateTime.UtcNow.Millisecond);
+
+    private readonly TimeSpan _generateStarInterval = TimeSpan.FromMilliseconds(5);
+    private TimeSpan _interval = TimeSpan.Zero;
+
+    #endregion Private Fields
+
     #region Public Constructors
 
-    public FlyingObjectSprite(IScene scene, Texture2D texture, float x, float y, int dx, int dy)
-        : base(scene, texture, x, y)
+    public ParticleScene(MfxGame game)
+        : base(game, Color.Black)
     {
-        _dx = dx;
-        _dy = dy;
-        Subscribe<BoundaryHitMessage>((p, m) =>
+        Subscribe<OutOfViewportMessage>((publisher, _) =>
         {
-            if (Equals(p))
-            {
-                if ((m.Boundary & Boundary.Left) == Boundary.Left ||
-                    (m.Boundary & Boundary.Right) == Boundary.Right)
-                    _dx = -Math.Sign(_dx) * _deltaOptions[_rnd.Next(_deltaOptions.Length)];
-
-                if ((m.Boundary & Boundary.Top) == Boundary.Top ||
-                    (m.Boundary & Boundary.Bottom) == Boundary.Bottom)
-                    _dy = -Math.Sign(_dy) * _deltaOptions[_rnd.Next(_deltaOptions.Length)];
-            }
+            if (publisher is ParticleSprite sprite) sprite.Texture?.Dispose();
         });
-        EnableBoundaryDetection = true;
     }
 
     #endregion Public Constructors
 
     #region Public Methods
 
+    public override void Load(ContentManager contentManager)
+    {
+    }
+
     public override void Update(GameTime gameTime)
     {
-        X += _dx;
-        Y += _dy;
+        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape)) End();
 
-        var screenWidth = Scene.Game.GraphicsDevice.Viewport.Width;
-        var screenHeight = Scene.Game.GraphicsDevice.Viewport.Height;
-
-        if (X < 0)
-            X = 0;
-        if (Y < 0)
-            Y = 0;
-
-        if (X > screenWidth - Width)
-            X = screenWidth - Width;
-
-        if (Y > screenHeight - Height)
-            Y = screenHeight - Height;
+        _interval += gameTime.ElapsedGameTime;
+        if (_interval > _generateStarInterval)
+        {
+            var x = (Viewport.Width - CenterAreaWidth) / 2.0f + _rnd.Next(CenterAreaWidth);
+            var y = (Viewport.Height - CenterAreaHeight) / 2.0f + _rnd.Next(CenterAreaHeight);
+            var texture = new Texture2D(Game.GraphicsDevice, 4, 4);
+            var color = new Color(_rnd.Next(256), _rnd.Next(256), _rnd.Next(256));
+            texture.SetData(Enumerable.Repeat(color, 16).ToArray());
+            var sprite = new ParticleSprite(this, texture, x, y);
+            Add(sprite);
+            _interval = TimeSpan.Zero;
+        }
 
         base.Update(gameTime);
     }
 
     #endregion Public Methods
-
-    #region Private Fields
-
-    private static readonly float[] _deltaOptions =
-    [
-        1.0f,
-        1.5f,
-        2.0f,
-        2.5f,
-        3.0f,
-        3.5f,
-        4.0f,
-        5.0f,
-        8.0f,
-        10.0f,
-        15.0f
-    ];
-
-    // ReSharper disable once InconsistentNaming
-    private static readonly Random _rnd = new(DateTime.UtcNow.Millisecond);
-
-    private float _dx;
-    private float _dy;
-
-    #endregion Private Fields
 }

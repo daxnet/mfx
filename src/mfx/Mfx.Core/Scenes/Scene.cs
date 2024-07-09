@@ -29,6 +29,7 @@
 // SOFTWARE.
 // =============================================================================
 
+
 using System.Collections;
 using System.Collections.Concurrent;
 using Mfx.Core.Messaging;
@@ -40,6 +41,23 @@ namespace Mfx.Core.Scenes;
 
 public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundColor) : IScene
 {
+    #region Protected Properties
+
+    protected bool Ended { get; private set; }
+
+    #endregion Protected Properties
+
+    #region Protected Methods
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // TODO release managed resources here
+        }
+    }
+
+    #endregion Protected Methods
 
     #region Private Fields
 
@@ -82,6 +100,13 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
 
     public bool EnableBoundaryDetection { get; set; }
 
+    public bool AutoInactivateWhenOutOfViewport
+    {
+        // TODO: Refine the design.
+        get => false;
+        set { }
+    }
+
     public MfxGame Game { get; } = game;
 
     public int Height => Texture?.Height ?? 0;
@@ -98,6 +123,7 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
 
     public Texture2D? Texture { get; } = texture;
 
+    public Viewport Viewport => Game.GraphicsDevice.Viewport;
     public bool Visible { get; set; }
 
     public int Width => Texture?.Width ?? 0;
@@ -130,7 +156,7 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
         GC.SuppressFinalize(this);
     }
 
-    public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+    public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
         Game.GraphicsDevice.Clear(BackgroundColor);
         _components
@@ -140,6 +166,16 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
             .OrderBy(v => v.Layer)
             .ToList()
             .ForEach(v => v.Draw(gameTime, spriteBatch));
+    }
+
+    public void End()
+    {
+        if (!Ended)
+        {
+            Clear();
+            Publish(new SceneEndedMessage(this));
+            Ended = true;
+        }
     }
 
     public virtual void Enter()
@@ -163,32 +199,29 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
 
     public abstract void Load(ContentManager contentManager);
 
-    public void Publish<TMessage>(TMessage message) where TMessage : IMessage => Game.MessageDispatcher.Dispatch(this, message);
+    public void Publish<TMessage>(TMessage message) where TMessage : IMessage =>
+        Game.MessageDispatcher.Dispatch(this, message);
 
     public bool Remove(IComponent item) => _components.TryRemove(item.Id, out _);
 
-    public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage => Game.MessageDispatcher.RegisterHandler(handler);
+    public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage =>
+        Game.MessageDispatcher.RegisterHandler(handler);
 
-    public void Update(GameTime gameTime)
+    public virtual void Update(GameTime gameTime)
     {
         _components
             .Values
             .Where(component => component.IsActive)
             .AsParallel()
             .ForAll(component => component.Update(gameTime));
+
+        var inactiveComponentIdList = _components.Values.Where(component => !component.IsActive)
+            .Select(component => component.Id);
+        Parallel.ForEach(inactiveComponentIdList, id =>
+        {
+            _components.TryRemove(id, out _);
+        });
     }
 
     #endregion Public Methods
-
-    #region Protected Methods
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            // TODO release managed resources here
-        }
-    }
-
-    #endregion Protected Methods
 }

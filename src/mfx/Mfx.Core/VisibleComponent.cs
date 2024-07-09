@@ -30,6 +30,7 @@
 // =============================================================================
 
 using Mfx.Core.Messaging;
+using Mfx.Core.Physics;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -39,18 +40,6 @@ namespace Mfx.Core;
 public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x, float y)
     : Component, IVisibleComponent
 {
-    #region Protected Properties
-
-    protected IScene Scene { get; } = scene;
-
-    #endregion Protected Properties
-
-    #region Protected Methods
-
-    protected abstract void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch);
-
-    #endregion Protected Methods
-
     #region Protected Constructors
 
     protected VisibleComponent(IScene scene)
@@ -78,6 +67,8 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
 
     public bool Collidable { get; set; } = true;
     public bool EnableBoundaryDetection { get; set; } = false;
+    public bool AutoInactivateWhenOutOfViewport { get; set; } = false;
+
     public virtual int Height => Texture?.Height ?? 0;
     public int Layer { get; set; } = 0;
     public Texture2D? Texture { get; } = texture;
@@ -87,6 +78,12 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
     public virtual float Y { get; set; } = y;
 
     #endregion Public Properties
+
+    #region Protected Properties
+
+    protected IScene Scene { get; } = scene;
+
+    #endregion Protected Properties
 
     #region Public Methods
 
@@ -112,25 +109,37 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
 
     public override void Update(GameTime gameTime)
     {
-        if (!EnableBoundaryDetection)
-            return;
-
-        var viewport = Scene.Game.GraphicsDevice.Viewport;
-        var result = Boundary.None;
-        if (X <= 0)
-            result |= Boundary.Left;
-        if (Y <= 0)
-            result |= Boundary.Top;
-        if (X >= viewport.Width - Width)
-            result |= Boundary.Right;
-        if (Y >= viewport.Height - Height)
-            result |= Boundary.Bottom;
-
-        if (result != Boundary.None)
+        if (EnableBoundaryDetection)
         {
-            Publish(new BoundaryHitMessage(result));
+            var viewport = Scene.Game.GraphicsDevice.Viewport;
+            var result = Boundary.None;
+            if (X <= 0)
+                result |= Boundary.Left;
+            if (Y <= 0)
+                result |= Boundary.Top;
+            if (X >= viewport.Width - Width)
+                result |= Boundary.Right;
+            if (Y >= viewport.Height - Height)
+                result |= Boundary.Bottom;
+
+            if (result != Boundary.None) Publish(new BoundaryHitMessage(result));
+        }
+
+        if (AutoInactivateWhenOutOfViewport)
+        {
+            if (X + Width <= 0 || X > Scene.Viewport.Width || Y + Height <= 0 || Y > Scene.Viewport.Height)
+            {
+                IsActive = false;
+                Publish(new OutOfViewportMessage(this));
+            }
         }
     }
 
     #endregion Public Methods
+
+    #region Protected Methods
+
+    protected abstract void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch);
+
+    #endregion Protected Methods
 }

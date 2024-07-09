@@ -29,50 +29,45 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Messaging;
-using Mfx.Core.Physics;
+using System;
+using Mfx.Core.Scenes;
+using Mfx.Core.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core;
+namespace Mfx.Samples.Particles;
 
-/// <summary>
-///     Represents that the implemented classes are visible components that can be placed and viewed
-///     on the game surface.
-/// </summary>
-public interface IVisibleComponent : IComponent, IMessagePublisher, IMessageSubscriber
+internal sealed class ParticleSprite : Sprite
 {
+    #region Private Fields
+
+    private readonly float _dx;
+    private readonly float _dy;
+    private readonly Random _rnd = new(DateTime.UtcNow.Millisecond);
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public ParticleSprite(IScene scene, Texture2D texture, float x, float y)
+        : base(scene, texture, x, y)
+    {
+        _dx = (_rnd.Next(100) % 2 == 0 ? 1 : -1) * (_rnd.NextSingle() * 10 + 1);
+        _dy = (_rnd.Next(100) % 2 == 0 ? 1 : -1) * (_rnd.NextSingle() * 10 + 1);
+        AutoInactivateWhenOutOfViewport = true;
+    }
+
+    #endregion Public Constructors
+
     #region Public Methods
 
-    void Draw(GameTime gameTime, SpriteBatch spriteBatch);
+    public override void Update(GameTime gameTime)
+    {
+        X += _dx;
+        Y += _dy;
+
+        base.Update(gameTime);
+    }
 
     #endregion Public Methods
-
-    #region Public Properties
-
-    Rectangle? BoundingBox { get; }
-
-    bool Collidable { get; set; }
-
-    /// <summary>
-    ///     Gets or sets a <see cref="bool" /> value which indicates if the boundary
-    ///     detection should be performed while the current visible component is moving
-    ///     on the scene.
-    /// </summary>
-    /// <remarks>
-    ///     If this property is set to <c>true</c>, a <see cref="BoundaryHitMessage" /> message will
-    ///     be dispatched to the system when the current visible component hits the boundary of the <see cref="Viewport" />.
-    /// </remarks>
-    bool EnableBoundaryDetection { get; set; }
-
-    bool AutoInactivateWhenOutOfViewport { get; set; }
-
-    int Layer { get; set; }
-    Texture2D? Texture { get; }
-    bool Visible { get; set; }
-    float X { get; set; }
-
-    float Y { get; set; }
-
-    #endregion Public Properties
 }

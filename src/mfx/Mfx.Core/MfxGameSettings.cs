@@ -33,13 +33,6 @@ namespace Mfx.Core;
 
 public sealed class MfxGameSettings
 {
-    #region Private Fields
-
-    private const string DefaultTitle = "MfxGame";
-    private const int DefaultWidth = 1024;
-    private const int DefaultHeight = 768;
-
-    #endregion Private Fields
 
     #region Public Fields
 
@@ -59,6 +52,14 @@ public sealed class MfxGameSettings
 
     #endregion Public Fields
 
+    #region Private Fields
+
+    private const int DefaultHeight = 768;
+    private const string DefaultTitle = "MfxGame";
+    private const int DefaultWidth = 1024;
+
+    #endregion Private Fields
+
     #region Public Properties
 
     public bool AllowResizing { get; set; }
@@ -70,4 +71,15 @@ public sealed class MfxGameSettings
     public int Width { get; set; }
 
     #endregion Public Properties
+
+    #region Public Methods
+
+    public static MfxGameSettings DefaultWithTitle(string title)
+    {
+        var result = NormalScreenShowMouse;
+        result.Title = title;
+        return result;
+    }
+
+    #endregion Public Methods
 }

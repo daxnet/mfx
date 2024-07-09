@@ -29,50 +29,36 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Messaging;
-using Mfx.Core.Physics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-
-namespace Mfx.Core;
+namespace Mfx.Core.Physics;
 
 /// <summary>
-///     Represents that the implemented classes are visible components that can be placed and viewed
-///     on the game surface.
+///     Represents the boundary type that a component has hit on.
 /// </summary>
-public interface IVisibleComponent : IComponent, IMessagePublisher, IMessageSubscriber
+[Flags]
+public enum Boundary
 {
-    #region Public Methods
-
-    void Draw(GameTime gameTime, SpriteBatch spriteBatch);
-
-    #endregion Public Methods
-
-    #region Public Properties
-
-    Rectangle? BoundingBox { get; }
-
-    bool Collidable { get; set; }
+    /// <summary>
+    ///     Indicates that the component hasn't reached the boundary.
+    /// </summary>
+    None = 0,
 
     /// <summary>
-    ///     Gets or sets a <see cref="bool" /> value which indicates if the boundary
-    ///     detection should be performed while the current visible component is moving
-    ///     on the scene.
+    ///     Indicates that the component has reached the boundary at the top.
     /// </summary>
-    /// <remarks>
-    ///     If this property is set to <c>true</c>, a <see cref="BoundaryHitMessage" /> message will
-    ///     be dispatched to the system when the current visible component hits the boundary of the <see cref="Viewport" />.
-    /// </remarks>
-    bool EnableBoundaryDetection { get; set; }
+    Top = 1,
 
-    bool AutoInactivateWhenOutOfViewport { get; set; }
+    /// <summary>
+    ///     Indicates that the component has reached the boundary at the left side.
+    /// </summary>
+    Left = 2,
 
-    int Layer { get; set; }
-    Texture2D? Texture { get; }
-    bool Visible { get; set; }
-    float X { get; set; }
+    /// <summary>
+    ///     Indicates that the component has reached the boundary at the right side.
+    /// </summary>
+    Right = 4,
 
-    float Y { get; set; }
-
-    #endregion Public Properties
+    /// <summary>
+    ///     Indicates that the component has readched the boundary at the bottom.
+    /// </summary>
+    Bottom = 8
 }
