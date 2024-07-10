@@ -144,7 +144,9 @@ public class StaticLabel : VisibleComponent
     /// <inheritdoc />
     protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
     {
+        spriteBatch.Begin();
         spriteBatch.DrawString(_font, Text, DrawingPosition, Options.Color);
+        spriteBatch.End();
     }
 
     #endregion Protected Methods
