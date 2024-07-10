@@ -63,7 +63,10 @@ internal sealed class ParticleScene : Scene
     {
         Subscribe<OutOfViewportMessage>((publisher, _) =>
         {
-            if (publisher is ParticleSprite sprite) sprite.Texture?.Dispose();
+            if (publisher is ParticleSprite sprite)
+            {
+                sprite.Texture?.Dispose();
+            }
         });
     }
 
@@ -77,7 +80,10 @@ internal sealed class ParticleScene : Scene
 
     public override void Update(GameTime gameTime)
     {
-        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape)) End();
+        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape))
+        {
+            End();
+        }
 
         _interval += gameTime.ElapsedGameTime;
         if (_interval > _generateStarInterval)

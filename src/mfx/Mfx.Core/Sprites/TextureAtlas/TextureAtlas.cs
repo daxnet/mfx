@@ -29,43 +29,40 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Messaging;
-using Mfx.Core.Physics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System.Xml.Serialization;
 
-namespace Mfx.Core;
+namespace Mfx.Core.Sprites.TextureAtlas;
 
-/// <summary>
-///     Represents that the implemented classes are visible components that can be placed and viewed
-///     on the game surface.
-/// </summary>
-public interface IVisibleComponent : IComponent, IDrawable, IMessagePublisher, IMessageSubscriber
+[XmlRoot]
+public sealed class TextureAtlas
 {
     #region Public Properties
 
-    Rectangle? BoundingBox { get; }
+    [XmlAttribute("imagePath")] public string? ImagePath { get; set; }
 
-    bool Collidable { get; set; }
-
-    /// <summary>
-    ///     Gets or sets a <see cref="bool" /> value which indicates if the boundary
-    ///     detection should be performed while the current visible component is moving
-    ///     on the scene.
-    /// </summary>
-    /// <remarks>
-    ///     If this property is set to <c>true</c>, a <see cref="BoundaryHitMessage" /> message will
-    ///     be dispatched to the system when the current visible component hits the boundary of the <see cref="Viewport" />.
-    /// </remarks>
-    bool EnableBoundaryDetection { get; set; }
-
-    int Layer { get; set; }
-    bool MarkInactivateWhenOutOfViewport { get; set; }
-    Texture2D? Texture { get; }
-    bool Visible { get; set; }
-    float X { get; set; }
-
-    float Y { get; set; }
+    [XmlArray]
+    [XmlArrayItem("SubTexture")]
+    public List<SubTexture> SubTextures { get; set; } = [];
 
     #endregion Public Properties
+
+    #region Public Methods
+
+    public static TextureAtlas? LoadFromFile(string fileName)
+    {
+        var xmlSerializer = new XmlSerializer(typeof(TextureAtlas));
+        using var fileStream = File.Open(fileName, FileMode.Open, FileAccess.Read);
+        return xmlSerializer.Deserialize(fileStream) as TextureAtlas;
+    }
+
+    public static void SaveToFile(string fileName, TextureAtlas textureAtlas)
+    {
+        var xmlSerializer = new XmlSerializer(typeof(TextureAtlas));
+        using var fileStream = File.Open(fileName, FileMode.Create, FileAccess.Write);
+        xmlSerializer.Serialize(fileStream, textureAtlas);
+    }
+
+    public override string? ToString() => ImagePath;
+
+    #endregion Public Methods
 }

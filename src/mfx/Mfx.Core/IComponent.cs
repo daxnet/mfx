@@ -29,6 +29,7 @@
 // SOFTWARE.
 // =============================================================================
 
+using Mfx.Core.Messaging;
 using Microsoft.Xna.Framework;
 
 namespace Mfx.Core;

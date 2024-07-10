@@ -133,7 +133,7 @@ public class MfxGame : Game
             {
                 var allScenes = new List<IScene>();
                 var cur = FirstScene;
-                while (cur.Next is not null)
+                while (cur is not null)
                 {
                     allScenes.Add(cur);
                     cur = cur.Next;
@@ -151,15 +151,15 @@ public class MfxGame : Game
     {
         if (_spriteBatch is not null && ActiveScene is not null)
         {
-            _spriteBatch.Begin(SpriteBatchDrawOptions.SpriteSortMode,
-                SpriteBatchDrawOptions.BlendState,
-                SpriteBatchDrawOptions.SamplerState,
-                SpriteBatchDrawOptions.DepthStencilState,
-                SpriteBatchDrawOptions.RasterizerState,
-                SpriteBatchDrawOptions.Effect,
-                SpriteBatchDrawOptions.TransformMatrix);
+            //_spriteBatch.Begin(SpriteBatchDrawOptions.SpriteSortMode,
+            //    SpriteBatchDrawOptions.BlendState,
+            //    SpriteBatchDrawOptions.SamplerState,
+            //    SpriteBatchDrawOptions.DepthStencilState,
+            //    SpriteBatchDrawOptions.RasterizerState,
+            //    SpriteBatchDrawOptions.Effect,
+            //    SpriteBatchDrawOptions.TransformMatrix);
             ActiveScene.Draw(gameTime, _spriteBatch);
-            _spriteBatch.End();
+            //_spriteBatch.End();
         }
 
         base.Draw(gameTime);

@@ -41,7 +41,12 @@ public class Sprite(IScene scene, Texture2D? texture, float x, float y) : Visibl
 
     protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        if (Texture is not null) spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
+        if (Texture is not null)
+        {
+            spriteBatch.Begin();
+            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
+            spriteBatch.End();
+        }
     }
 
     #endregion Protected Methods

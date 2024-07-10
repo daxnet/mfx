@@ -29,34 +29,63 @@
 // SOFTWARE.
 // =============================================================================
 
+using Mfx.Core.Messaging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace Mfx.Core.Scenes;
 
-public interface IScene : ICollection<IComponent>, IVisibleComponent, IDisposable
+/// <summary>
+///     Represents a 2D scene in the game.
+/// </summary>
+public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessagePublisher, IMessageSubscriber,
+    IDisposable
 {
     #region Public Properties
 
+    /// <summary>
+    ///     Gets the background color.
+    /// </summary>
     Color BackgroundColor { get; }
 
+    /// <summary>
+    ///     Gets the instance of the <see cref="MfxGame" /> to which the current scene belongs.
+    /// </summary>
     MfxGame Game { get; }
 
+    /// <summary>
+    ///     Gets or sets the next scene, set it to <c>null</c> if the current one is the last scene.
+    /// </summary>
+    /// <remarks>
+    ///     <see cref="MfxGame" /> will end once it finishes performing the current scene and the
+    ///     <c>Next</c> property of the current scene is <c>null</c>.
+    /// </remarks>
     IScene? Next { get; set; }
 
+    /// <summary>
+    ///     Gets the <see cref="Viewport" /> of the scene.
+    /// </summary>
     Viewport Viewport { get; }
 
     #endregion Public Properties
 
     #region Public Methods
 
-    void End();
-
+    /// <summary>
+    ///     A callback method that is executed each time when the current scene is going to be the active scene of the game.
+    /// </summary>
     void Enter();
 
+    /// <summary>
+    ///     A callback method that is executed each time when the current scene is going to be an inactive scene of the game.
+    /// </summary>
     void Leave();
 
+    /// <summary>
+    ///     Loads the required contents for the current scene to run.
+    /// </summary>
+    /// <param name="contentManager">The <see cref="ContentManager" /> from where the contents or resources are loaded.</param>
     void Load(ContentManager contentManager);
 
     #endregion Public Methods

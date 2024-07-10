@@ -29,7 +29,6 @@
 // SOFTWARE.
 // =============================================================================
 
-
 using System.Collections;
 using System.Collections.Concurrent;
 using Mfx.Core.Messaging;
@@ -39,26 +38,8 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Mfx.Core.Scenes;
 
-public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundColor) : IScene
+public abstract class Scene(MfxGame game, Color backgroundColor) : IScene
 {
-    #region Protected Properties
-
-    protected bool Ended { get; private set; }
-
-    #endregion Protected Properties
-
-    #region Protected Methods
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            // TODO release managed resources here
-        }
-    }
-
-    #endregion Protected Methods
-
     #region Private Fields
 
     private readonly ConcurrentDictionary<Guid, IComponent> _components = new();
@@ -68,12 +49,7 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
     #region Protected Constructors
 
     protected Scene(MfxGame game)
-        : this(game, null, Color.CornflowerBlue)
-    {
-    }
-
-    protected Scene(MfxGame game, Color backgroundColor)
-        : this(game, null, backgroundColor)
+        : this(game, Color.CornflowerBlue)
     {
     }
 
@@ -81,58 +57,22 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
 
     #region Public Properties
 
-    public bool AutoRemoveInactiveComponents { get; protected set; } = true;
-
     public Color BackgroundColor { get; } = backgroundColor;
-
-    public Rectangle? BoundingBox
-    {
-        get
-        {
-            if (Width == 0 || Height == 0) return null;
-            return new Rectangle((int)Math.Ceiling(X), (int)Math.Ceiling(Y), Width, Height);
-        }
-    }
-
-    public bool Collidable { get; set; }
-
     public int Count => _components.Count;
-
-    public bool EnableBoundaryDetection { get; set; }
-
-    public bool AutoInactivateWhenOutOfViewport
-    {
-        // TODO: Refine the design.
-        get => false;
-        set { }
-    }
-
     public MfxGame Game { get; } = game;
-
-    public int Height => Texture?.Height ?? 0;
-
     public Guid Id { get; } = Guid.NewGuid();
-
     public bool IsActive { get; set; }
-
     public bool IsReadOnly => false;
-
-    public int Layer { get; set; }
-
     public IScene? Next { get; set; }
-
-    public Texture2D? Texture { get; } = texture;
-
     public Viewport Viewport => Game.GraphicsDevice.Viewport;
-    public bool Visible { get; set; }
-
-    public int Width => Texture?.Width ?? 0;
-
-    public float X { get; set; } = 0;
-
-    public float Y { get; set; } = 0;
 
     #endregion Public Properties
+
+    #region Protected Properties
+
+    protected bool Ended { get; private set; }
+
+    #endregion Protected Properties
 
     #region Public Methods
 
@@ -168,24 +108,22 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
             .ForEach(v => v.Draw(gameTime, spriteBatch));
     }
 
-    public void End()
-    {
-        if (!Ended)
-        {
-            Clear();
-            Publish(new SceneEndedMessage(this));
-            Ended = true;
-        }
-    }
-
     public virtual void Enter()
     {
     }
 
     public bool Equals(IComponent? other)
     {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
+        if (ReferenceEquals(null, other))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
         return other is IScene scene && Id.Equals(scene.Id);
     }
 
@@ -219,9 +157,35 @@ public abstract class Scene(MfxGame game, Texture2D? texture, Color backgroundCo
             .Select(component => component.Id);
         Parallel.ForEach(inactiveComponentIdList, id =>
         {
-            _components.TryRemove(id, out _);
+            _components.TryRemove(id, out var component);
+            if (component is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         });
     }
 
     #endregion Public Methods
+
+    #region Protected Methods
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // TODO release managed resources here
+        }
+    }
+
+    protected virtual void End()
+    {
+        if (!Ended)
+        {
+            Clear();
+            Publish(new SceneEndedMessage(this));
+            Ended = true;
+        }
+    }
+
+    #endregion Protected Methods
 }

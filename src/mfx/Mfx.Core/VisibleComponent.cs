@@ -67,7 +67,7 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
 
     public bool Collidable { get; set; } = true;
     public bool EnableBoundaryDetection { get; set; } = false;
-    public bool AutoInactivateWhenOutOfViewport { get; set; } = false;
+    public bool MarkInactivateWhenOutOfViewport { get; set; } = false;
 
     public virtual int Height => Texture?.Height ?? 0;
     public int Layer { get; set; } = 0;
@@ -125,7 +125,7 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
             if (result != Boundary.None) Publish(new BoundaryHitMessage(result));
         }
 
-        if (AutoInactivateWhenOutOfViewport)
+        if (MarkInactivateWhenOutOfViewport)
         {
             if (X + Width <= 0 || X > Scene.Viewport.Width || Y + Height <= 0 || Y > Scene.Viewport.Height)
             {

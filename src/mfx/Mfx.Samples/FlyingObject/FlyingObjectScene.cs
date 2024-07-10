@@ -47,7 +47,10 @@ internal sealed class FlyingObjectScene(MfxGame game) : Scene(game, Color.Black)
     {
         if (!_disposed)
         {
-            if (disposing) _spriteTexture?.Dispose();
+            if (disposing)
+            {
+                _spriteTexture?.Dispose();
+            }
 
             base.Dispose(disposing);
             _disposed = true;
@@ -93,7 +96,10 @@ internal sealed class FlyingObjectScene(MfxGame game) : Scene(game, Color.Black)
 
     public override void Update(GameTime gameTime)
     {
-        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape)) End();
+        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape))
+        {
+            End();
+        }
 
         base.Update(gameTime);
     }

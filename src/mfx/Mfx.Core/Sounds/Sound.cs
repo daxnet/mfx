@@ -29,44 +29,89 @@
 // SOFTWARE.
 // =============================================================================
 
-using System;
-using Mfx.Core.Scenes;
-using Mfx.Core.Sprites;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 
-namespace Mfx.Samples.Particles;
+namespace Mfx.Core.Sounds;
 
-internal sealed class ParticleSprite : Sprite
+public sealed class Sound : Component, IDisposable
 {
     #region Private Fields
 
-    private readonly float _dx;
-    private readonly float _dy;
-    private readonly Random _rnd = new(DateTime.UtcNow.Millisecond);
+    private readonly float _initialVolume;
+
+    private readonly SoundEffect _soundEffect;
+
+    private SoundEffectInstance? _soundEffectInstance;
 
     #endregion Private Fields
 
     #region Public Constructors
 
-    public ParticleSprite(IScene scene, Texture2D texture, float x, float y)
-        : base(scene, texture, x, y)
+    public Sound(SoundEffect soundEffect, float volume = 1.0f)
     {
-        _dx = (_rnd.Next(100) % 2 == 0 ? 1 : -1) * (_rnd.NextSingle() * 10 + 1);
-        _dy = (_rnd.Next(100) % 2 == 0 ? 1 : -1) * (_rnd.NextSingle() * 10 + 1);
-        MarkInactivateWhenOutOfViewport = true;
+        _soundEffect = soundEffect;
+        Volume = volume;
+        _initialVolume = volume;
     }
 
     #endregion Public Constructors
 
+    #region Public Properties
+
+    public SoundState State => _soundEffectInstance is not null && !_soundEffectInstance.IsDisposed
+        ? _soundEffectInstance.State
+        : SoundState.Stopped;
+
+    public float Volume
+    {
+        get => _soundEffectInstance?.Volume ?? default;
+        set
+        {
+            if (_soundEffectInstance is not null && !_soundEffectInstance.IsDisposed)
+            {
+                _soundEffectInstance.Volume = value;
+            }
+        }
+    }
+
+    #endregion Public Properties
+
     #region Public Methods
+
+    public void Dispose()
+    {
+        Stop();
+    }
+
+    public void Play()
+    {
+        Stop();
+        _soundEffectInstance = _soundEffect.CreateInstance();
+        _soundEffectInstance.Volume = _initialVolume;
+        _soundEffectInstance.Play();
+    }
+
+    public void Stop()
+    {
+        if (_soundEffectInstance is null ||
+            _soundEffectInstance.IsDisposed)
+        {
+            return;
+        }
+
+        try
+        {
+            _soundEffectInstance.Stop(true);
+            _soundEffectInstance.Dispose();
+        }
+        catch
+        {
+        }
+    }
 
     public override void Update(GameTime gameTime)
     {
-        X += _dx;
-        Y += _dy;
-
-        base.Update(gameTime);
     }
 
     #endregion Public Methods

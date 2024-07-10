@@ -29,43 +29,37 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Messaging;
-using Mfx.Core.Physics;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System.Xml.Serialization;
 
-namespace Mfx.Core;
+namespace Mfx.Core.Sprites.TextureAtlas;
 
-/// <summary>
-///     Represents that the implemented classes are visible components that can be placed and viewed
-///     on the game surface.
-/// </summary>
-public interface IVisibleComponent : IComponent, IDrawable, IMessagePublisher, IMessageSubscriber
+public sealed class SubTexture
 {
     #region Public Properties
 
-    Rectangle? BoundingBox { get; }
+    [XmlAttribute("frameHeight")] public int FrameHeight { get; set; }
 
-    bool Collidable { get; set; }
+    [XmlAttribute("frameWidth")] public int FrameWidth { get; set; }
 
-    /// <summary>
-    ///     Gets or sets a <see cref="bool" /> value which indicates if the boundary
-    ///     detection should be performed while the current visible component is moving
-    ///     on the scene.
-    /// </summary>
-    /// <remarks>
-    ///     If this property is set to <c>true</c>, a <see cref="BoundaryHitMessage" /> message will
-    ///     be dispatched to the system when the current visible component hits the boundary of the <see cref="Viewport" />.
-    /// </remarks>
-    bool EnableBoundaryDetection { get; set; }
+    [XmlAttribute("frameX")] public int FrameX { get; set; }
 
-    int Layer { get; set; }
-    bool MarkInactivateWhenOutOfViewport { get; set; }
-    Texture2D? Texture { get; }
-    bool Visible { get; set; }
-    float X { get; set; }
+    [XmlAttribute("frameY")] public int FrameY { get; set; }
 
-    float Y { get; set; }
+    [XmlAttribute("height")] public int Height { get; set; }
+
+    [XmlAttribute("name")] public string? Name { get; set; }
+
+    [XmlAttribute("width")] public int Width { get; set; }
+
+    [XmlAttribute("x")] public int X { get; set; }
+
+    [XmlAttribute("y")] public int Y { get; set; }
 
     #endregion Public Properties
+
+    #region Public Methods
+
+    public override string? ToString() => Name;
+
+    #endregion Public Methods
 }
