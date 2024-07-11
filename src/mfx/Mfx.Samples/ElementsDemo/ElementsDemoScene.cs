@@ -39,14 +39,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Mfx.Samples.ElementsDemo;
 
-internal sealed class ElementsDemoScene(MfxGame game) : Scene(game, Color.CornflowerBlue)
+internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game, name, Color.CornflowerBlue)
 {
     #region Private Fields
 
     private SpriteFont? _labelFont;
     private Menu? _menu;
     private SpriteFont? _menuFont;
-    private StaticLabel? _selectedMenuTextLabel;
+    private Label? _selectedMenuTextLabel;
 
     #endregion Private Fields
 
@@ -60,15 +60,31 @@ internal sealed class ElementsDemoScene(MfxGame game) : Scene(game, Color.Cornfl
         _menu = new Menu(this, _menuFont, ["New Game", "Options", "Load From Existing Saving", "Exit"], 100, 200,
             Color.White, Color.Red);
 
-        _selectedMenuTextLabel = new StaticLabel("", this, _labelFont, 0, 25, Color.Yellow);
+        _selectedMenuTextLabel = new Label("", this, _labelFont, 0, 25, Color.Yellow);
 
-        Add(new StaticLabel("This is a static label.", this, _labelFont, 0, 0, Color.Yellow));
+        Add(new Label("This is a static label.", this, _labelFont, 0, 0, Color.Yellow));
         Add(_selectedMenuTextLabel);
         Add(_menu);
 
         Subscribe<MenuItemClickedMessage>((publisher, message) =>
         {
-            _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
+            // _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
+            var nextScene = message.MenuItem switch
+            {
+                "New Game" => Game.GetScene("NewGameScene"),
+                _ => null
+            };
+
+            if (nextScene is null)
+            {
+                _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
+            }
+            else
+            {
+                Next = nextScene;
+                nextScene.Next = this;
+                End();
+            }
         });
     }
 

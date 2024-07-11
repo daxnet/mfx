@@ -4,23 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Mfx.Core;
-using Mfx.Core.Elements;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Mfx.Samples
+namespace Mfx.Samples.ElementsDemo
 {
-    internal sealed class EndingScene(MfxGame game, string name) : Scene(game, name, Color.Black)
+    internal sealed class NewGameScene(MfxGame game, string name) : Scene(game, name)
     {
         private SpriteFont? _font;
 
         public override void Load(ContentManager contentManager)
         {
             _font = contentManager.Load<SpriteFont>("arial");
-            Add(new Label("Press ENTER to exit.", this, _font, Color.MediumVioletRed));
         }
 
         public override void Update(GameTime gameTime)
@@ -31,6 +29,15 @@ namespace Mfx.Samples
             }
 
             base.Update(gameTime);
+        }
+
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
+        {
+           
+            base.Draw(gameTime, spriteBatch);
+            spriteBatch.Begin();
+            spriteBatch.DrawString(_font, "This is the game scene. Press ENTER to go back.", Vector2.Zero, Color.Yellow);
+            spriteBatch.End();
         }
     }
 }

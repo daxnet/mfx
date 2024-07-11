@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Mfx.Samples.FlyingObject;
 
-internal sealed class FlyingObjectScene(MfxGame game) : Scene(game, Color.Black)
+internal sealed class FlyingObjectScene(MfxGame game, string name) : Scene(game, name, Color.Black)
 {
     #region Protected Methods
 

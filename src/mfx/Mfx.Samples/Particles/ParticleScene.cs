@@ -58,8 +58,8 @@ internal sealed class ParticleScene : Scene
 
     #region Public Constructors
 
-    public ParticleScene(MfxGame game)
-        : base(game, Color.Black)
+    public ParticleScene(MfxGame game, string name)
+        : base(game, name, Color.Black)
     {
         Subscribe<OutOfViewportMessage>((publisher, _) =>
         {

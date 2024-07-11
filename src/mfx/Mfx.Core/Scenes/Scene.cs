@@ -38,7 +38,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Mfx.Core.Scenes;
 
-public abstract class Scene(MfxGame game, Color backgroundColor) : IScene
+public abstract class Scene(MfxGame game, string name, Color backgroundColor) : IScene
 {
     #region Private Fields
 
@@ -48,8 +48,8 @@ public abstract class Scene(MfxGame game, Color backgroundColor) : IScene
 
     #region Protected Constructors
 
-    protected Scene(MfxGame game)
-        : this(game, Color.CornflowerBlue)
+    protected Scene(MfxGame game, string name)
+        : this(game, name, Color.CornflowerBlue)
     {
     }
 
@@ -60,6 +60,7 @@ public abstract class Scene(MfxGame game, Color backgroundColor) : IScene
     public Color BackgroundColor { get; } = backgroundColor;
     public int Count => _components.Count;
     public MfxGame Game { get; } = game;
+    public string Name { get; } = name;
     public Guid Id { get; } = Guid.NewGuid();
     public bool IsActive { get; set; }
     public bool IsReadOnly => false;
@@ -181,7 +182,7 @@ public abstract class Scene(MfxGame game, Color backgroundColor) : IScene
     {
         if (!Ended)
         {
-            Clear();
+            // Clear();
             Publish(new SceneEndedMessage(this));
             Ended = true;
         }

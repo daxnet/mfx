@@ -50,6 +50,7 @@ public class MfxGame : Game
 
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly MfxGameSettings _settings;
+    private readonly Dictionary<string, IScene> _scenes = new();
     private bool _disposed;
 
     #endregion Private Fields
@@ -91,7 +92,7 @@ public class MfxGame : Game
     #region Protected Properties
 
     protected IScene? FirstScene { get; set; }
-    protected SpriteBatchDrawOptions SpriteBatchDrawOptions { get; set; } = SpriteBatchDrawOptions.Default;
+    //protected SpriteBatchDrawOptions SpriteBatchDrawOptions { get; set; } = SpriteBatchDrawOptions.Default;
 
     #endregion Protected Properties
 
@@ -101,26 +102,31 @@ public class MfxGame : Game
 
     #endregion Private Properties
 
+    public IScene GetScene(string name) => _scenes[name];
+
     #region Protected Methods
 
-    protected TScene AddScene<TScene>(IScene? previousScene = null)
+    protected TScene AddScene<TScene>(string name, IScene? previousScene = null)
         where TScene : class, IScene
     {
         var constructors = from p in typeof(TScene).GetConstructors()
                            let parameters = p.GetParameters()
-                           where parameters.Length == 1 &&
-                                 parameters[0].ParameterType == typeof(MfxGame)
+                           where parameters.Length == 2 &&
+                                 parameters[0].ParameterType == typeof(MfxGame) &&
+                                 parameters[1].ParameterType == typeof(string)
                            select p;
         if (!constructors.Any())
             throw new MfxException($"No suitable constructor found on type {typeof(TScene).FullName}.");
 
-        if (Activator.CreateInstance(typeof(TScene), this) is not TScene scene)
+        if (Activator.CreateInstance(typeof(TScene), [this, name]) is not TScene scene)
             throw new MfxException($"Unable to initialize a new instance of type {typeof(TScene).FullName}.");
 
         if (previousScene is null)
             ActiveScene = scene;
         else
             previousScene.Next = scene;
+
+        _scenes.Add(name, scene);
 
         return scene;
     }

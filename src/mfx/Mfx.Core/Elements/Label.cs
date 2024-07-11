@@ -38,7 +38,7 @@ namespace Mfx.Core.Elements;
 /// <summary>
 ///     Represents a static label which shows a static text on the specified scene.
 /// </summary>
-public class StaticLabel : VisibleComponent
+public class Label : VisibleComponent
 {
     #region Private Fields
 
@@ -58,7 +58,7 @@ public class StaticLabel : VisibleComponent
     /// <param name="x">The X coordinate of the text position.</param>
     /// <param name="y">The Y coordinate of the text position.</param>
     /// <param name="color">The <see cref="Color" /> to be used to show the text.</param>
-    public StaticLabel(string text, IScene scene, SpriteFont font, float x, float y, Color color)
+    public Label(string text, IScene scene, SpriteFont font, float x, float y, Color color)
         : this(text, scene, font, new RenderingOptions(color, false), x, y)
     {
     }
@@ -75,7 +75,7 @@ public class StaticLabel : VisibleComponent
     ///     placed at the center of the current <see cref="Viewport" />. Therefore, X and Y properties will always be
     ///     zero (0).
     /// </remarks>
-    public StaticLabel(string text, IScene scene, SpriteFont font, Color color)
+    public Label(string text, IScene scene, SpriteFont font, Color color)
         : this(text, scene, font, new RenderingOptions(color, true), 0, 0)
     {
     }
@@ -89,7 +89,7 @@ public class StaticLabel : VisibleComponent
     /// <param name="options">The <see cref="RenderingOptions" /> that specifies the options for rendering the static label.</param>
     /// <param name="x">The X coordinate of the text position.</param>
     /// <param name="y">The Y coordinate of the text position.</param>
-    public StaticLabel(string text, IScene scene, SpriteFont font, RenderingOptions options, float x, float y)
+    public Label(string text, IScene scene, SpriteFont font, RenderingOptions options, float x, float y)
         : base(scene, font.Texture, x, y)
     {
         _font = font;

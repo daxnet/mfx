@@ -42,6 +42,7 @@ namespace Mfx.Core.Scenes;
 public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessagePublisher, IMessageSubscriber,
     IDisposable
 {
+
     #region Public Properties
 
     /// <summary>
@@ -54,6 +55,10 @@ public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessa
     /// </summary>
     MfxGame Game { get; }
 
+    /// <summary>
+    /// Gets the name of the scene.
+    /// </summary>
+    string Name { get; }
     /// <summary>
     ///     Gets or sets the next scene, set it to <c>null</c> if the current one is the last scene.
     /// </summary>
@@ -89,4 +94,5 @@ public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessa
     void Load(ContentManager contentManager);
 
     #endregion Public Methods
+
 }
