@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Mfx.Samples
 {
-    internal sealed class EndingScene(MfxGame game) : Scene(game, Color.CornflowerBlue)
+    internal sealed class EndingScene(MfxGame game) : Scene(game, Color.Black)
     {
         private SpriteFont? _font;
 

@@ -32,3 +32,10 @@
 /processorParam:TextureFormat=Color
 /build:dog.png
 
+#begin times_menu.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:times_menu.spritefont
+
