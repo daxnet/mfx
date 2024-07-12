@@ -80,9 +80,9 @@ internal sealed class ParticleScene : Scene
 
     public override void Update(GameTime gameTime)
     {
-        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
-            End();
+            Game.Transit("EndingScene");
         }
 
         _interval += gameTime.ElapsedGameTime;

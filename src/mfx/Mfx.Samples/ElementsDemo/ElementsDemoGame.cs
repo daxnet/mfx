@@ -12,8 +12,9 @@ namespace Mfx.Samples.ElementsDemo
         public ElementsDemoGame()
             : base(MfxGameSettings.DefaultWithTitle("Elements Demonstration"))
         {
-            FirstScene = AddScene<ElementsDemoScene>("ElementsDemoScene");
-            AddScene<NewGameScene>("NewGameScene", FirstScene);
+            AddScene<ElementsDemoScene>();
+            AddScene<NewGameScene>();
+            StartFrom<ElementsDemoScene>();
         }
     }
 }

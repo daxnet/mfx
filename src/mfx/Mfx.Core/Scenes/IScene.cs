@@ -42,7 +42,6 @@ namespace Mfx.Core.Scenes;
 public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessagePublisher, IMessageSubscriber,
     IDisposable
 {
-
     #region Public Properties
 
     /// <summary>
@@ -56,17 +55,14 @@ public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessa
     MfxGame Game { get; }
 
     /// <summary>
-    /// Gets the name of the scene.
+    ///     Gets the name of the scene.
     /// </summary>
     string Name { get; }
+
     /// <summary>
-    ///     Gets or sets the next scene, set it to <c>null</c> if the current one is the last scene.
+    ///     Gets a <see cref="bool" /> value which indicates if the current scene has paused.
     /// </summary>
-    /// <remarks>
-    ///     <see cref="MfxGame" /> will end once it finishes performing the current scene and the
-    ///     <c>Next</c> property of the current scene is <c>null</c>.
-    /// </remarks>
-    IScene? Next { get; set; }
+    bool Paused { get; }
 
     /// <summary>
     ///     Gets the <see cref="Viewport" /> of the scene.
@@ -93,6 +89,15 @@ public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessa
     /// <param name="contentManager">The <see cref="ContentManager" /> from where the contents or resources are loaded.</param>
     void Load(ContentManager contentManager);
 
-    #endregion Public Methods
+    /// <summary>
+    ///     Pauses the current scene.
+    /// </summary>
+    void Pause();
 
+    /// <summary>
+    ///     Resumes the current scene from the paused state.
+    /// </summary>
+    void Resume();
+
+    #endregion Public Methods
 }

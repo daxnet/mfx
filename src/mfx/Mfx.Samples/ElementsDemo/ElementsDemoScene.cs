@@ -69,21 +69,24 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
         Subscribe<MenuItemClickedMessage>((publisher, message) =>
         {
             // _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
-            var nextScene = message.MenuItem switch
+            var nextSceneName = message.MenuItem switch
             {
-                "New Game" => Game.GetScene("NewGameScene"),
+                "New Game" => "NewGameScene",
+                "Exit" => "Exit",
                 _ => null
             };
 
-            if (nextScene is null)
+            if (nextSceneName is null)
             {
                 _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
             }
+            else if (nextSceneName == "Exit")
+            {
+                Game.Exit();
+            }
             else
             {
-                Next = nextScene;
-                nextScene.Next = this;
-                End();
+                Game.Transit(nextSceneName);
             }
         });
     }

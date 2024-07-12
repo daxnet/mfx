@@ -40,8 +40,9 @@ public class ParticleGame : MfxGame
     public ParticleGame()
         : base(MfxGameSettings.DefaultWithTitle("Particles"))
     {
-        FirstScene = AddScene<ParticleScene>("ParticleScene");
-        AddScene<EndingScene>("EndingScene", FirstScene);
+        AddScene<ParticleScene>();
+        AddScene<EndingScene>();
+        StartFrom<ParticleScene>();
     }
 
     #endregion Public Constructors

@@ -40,6 +40,7 @@ namespace Mfx.Core.Scenes;
 
 public abstract class Scene(MfxGame game, string name, Color backgroundColor) : IScene
 {
+
     #region Private Fields
 
     private readonly ConcurrentDictionary<Guid, IComponent> _components = new();
@@ -60,20 +61,15 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
     public Color BackgroundColor { get; } = backgroundColor;
     public int Count => _components.Count;
     public MfxGame Game { get; } = game;
-    public string Name { get; } = name;
     public Guid Id { get; } = Guid.NewGuid();
     public bool IsActive { get; set; }
     public bool IsReadOnly => false;
-    public IScene? Next { get; set; }
+    public string Name { get; } = name;
+
+    public bool Paused { get; private set; }
     public Viewport Viewport => Game.GraphicsDevice.Viewport;
 
     #endregion Public Properties
-
-    #region Protected Properties
-
-    protected bool Ended { get; private set; }
-
-    #endregion Protected Properties
 
     #region Public Methods
 
@@ -86,10 +82,7 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
         return _components.ContainsKey(item.Id);
     }
 
-    public void CopyTo(IComponent[] array, int arrayIndex)
-    {
-        _components.Values.CopyTo(array, arrayIndex);
-    }
+    public void CopyTo(IComponent[] array, int arrayIndex) => _components.Values.CopyTo(array, arrayIndex);
 
     public void Dispose()
     {
@@ -99,14 +92,17 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
 
     public virtual void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        Game.GraphicsDevice.Clear(BackgroundColor);
-        _components
-            .Values
-            .Where(v => v is IVisibleComponent)
-            .Cast<IVisibleComponent>()
-            .OrderBy(v => v.Layer)
-            .ToList()
-            .ForEach(v => v.Draw(gameTime, spriteBatch));
+        if (!Paused)
+        {
+            Game.GraphicsDevice.Clear(BackgroundColor);
+            _components
+                .Values
+                .Where(v => v is IVisibleComponent)
+                .Cast<IVisibleComponent>()
+                .OrderBy(v => v.Layer)
+                .ToList()
+                .ForEach(v => v.Draw(gameTime, spriteBatch));
+        }
     }
 
     public virtual void Enter()
@@ -138,32 +134,47 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
 
     public abstract void Load(ContentManager contentManager);
 
+    public void Pause()
+    {
+        Paused = true;
+        OnPaused();
+    }
+
     public void Publish<TMessage>(TMessage message) where TMessage : IMessage =>
-        Game.MessageDispatcher.Dispatch(this, message);
+            Game.MessageDispatcher.Dispatch(this, message);
 
     public bool Remove(IComponent item) => _components.TryRemove(item.Id, out _);
 
+    public void Resume()
+    {
+        Paused = false;
+        OnResumed();
+    }
+
     public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage =>
-        Game.MessageDispatcher.RegisterHandler(handler);
+            Game.MessageDispatcher.RegisterHandler(handler);
 
     public virtual void Update(GameTime gameTime)
     {
-        _components
-            .Values
-            .Where(component => component.IsActive)
-            .AsParallel()
-            .ForAll(component => component.Update(gameTime));
-
-        var inactiveComponentIdList = _components.Values.Where(component => !component.IsActive)
-            .Select(component => component.Id);
-        Parallel.ForEach(inactiveComponentIdList, id =>
+        if (!Paused)
         {
-            _components.TryRemove(id, out var component);
-            if (component is IDisposable disposable)
+            _components
+                .Values
+                .Where(component => component.IsActive)
+                .AsParallel()
+                .ForAll(component => component.Update(gameTime));
+
+            var inactiveComponentIdList = _components.Values.Where(component => !component.IsActive)
+                .Select(component => component.Id);
+            Parallel.ForEach(inactiveComponentIdList, id =>
             {
-                disposable.Dispose();
-            }
-        });
+                _components.TryRemove(id, out var component);
+                if (component is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            });
+        }
     }
 
     #endregion Public Methods
@@ -178,15 +189,14 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
         }
     }
 
-    protected virtual void End()
+    protected virtual void OnPaused()
     {
-        if (!Ended)
-        {
-            // Clear();
-            Publish(new SceneEndedMessage(this));
-            Ended = true;
-        }
+    }
+
+    protected virtual void OnResumed()
+    {
     }
 
     #endregion Protected Methods
+
 }

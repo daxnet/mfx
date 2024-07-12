@@ -25,7 +25,7 @@ namespace Mfx.Samples.ElementsDemo
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
-                End();
+                Game.Transit("ElementsDemoScene");
             }
 
             base.Update(gameTime);

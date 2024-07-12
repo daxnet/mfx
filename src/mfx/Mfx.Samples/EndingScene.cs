@@ -27,7 +27,7 @@ namespace Mfx.Samples
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Enter))
             {
-                End();
+                Game.Exit();
             }
 
             base.Update(gameTime);

@@ -29,7 +29,6 @@
 // SOFTWARE.
 // =============================================================================
 
-using System.Reflection;
 using Mfx.Core.Messaging;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
@@ -39,7 +38,6 @@ namespace Mfx.Core;
 
 public class MfxGame : Game
 {
-
     #region Protected Fields
 
     protected SpriteBatch? _spriteBatch;
@@ -49,8 +47,9 @@ public class MfxGame : Game
     #region Private Fields
 
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
-    private readonly MfxGameSettings _settings;
     private readonly Dictionary<string, IScene> _scenes = new();
+    private readonly MfxGameSettings _settings;
+    private IScene? _activeScene;
     private bool _disposed;
 
     #endregion Private Fields
@@ -67,18 +66,6 @@ public class MfxGame : Game
         _graphicsDeviceManager = new GraphicsDeviceManager(this);
         _settings = settings;
         Content.RootDirectory = "Content";
-        MessageDispatcher.RegisterHandler<SceneEndedMessage>((_, _) =>
-        {
-            ActiveScene?.Leave();
-            ActiveScene = ActiveScene?.Next;
-            if (ActiveScene is null)
-            {
-                Exit();
-                return;
-            }
-
-            ActiveScene?.Enter();
-        });
     }
 
     #endregion Public Constructors
@@ -89,63 +76,73 @@ public class MfxGame : Game
 
     #endregion Internal Properties
 
-    #region Protected Properties
+    #region Public Methods
 
-    protected IScene? FirstScene { get; set; }
-    //protected SpriteBatchDrawOptions SpriteBatchDrawOptions { get; set; } = SpriteBatchDrawOptions.Default;
+    /// <summary>
+    ///     Transits to a scene with the specified name.
+    /// </summary>
+    /// <param name="sceneName">The name of the scene to be transited to.</param>
+    public void Transit(string sceneName)
+    {
+        // Gets the scene by name.
+        if (!_scenes.TryGetValue(sceneName, out var target))
+        {
+            throw new MfxException($"The scene '{sceneName}' doesn't exist.");
+        }
 
-    #endregion Protected Properties
+        _activeScene?.Pause();
+        _activeScene?.Leave();
 
-    #region Private Properties
+        target.Enter();
+        if (target.Paused)
+        {
+            target.Resume();
+        }
 
-    private IScene? ActiveScene { get; set; }
+        _activeScene = target;
+    }
 
-    #endregion Private Properties
+    public void Transit<TScene>()
+        where TScene : class, IScene =>
+        Transit(typeof(TScene).Name);
 
-    public IScene GetScene(string name) => _scenes[name];
+    #endregion Public Methods
 
     #region Protected Methods
 
-    protected TScene AddScene<TScene>(string name, IScene? previousScene = null)
+    protected TScene AddScene<TScene>(string name)
         where TScene : class, IScene
     {
         var constructors = from p in typeof(TScene).GetConstructors()
-                           let parameters = p.GetParameters()
-                           where parameters.Length == 2 &&
-                                 parameters[0].ParameterType == typeof(MfxGame) &&
-                                 parameters[1].ParameterType == typeof(string)
-                           select p;
+            let parameters = p.GetParameters()
+            where parameters.Length == 2 &&
+                  parameters[0].ParameterType == typeof(MfxGame) &&
+                  parameters[1].ParameterType == typeof(string)
+            select p;
         if (!constructors.Any())
+        {
             throw new MfxException($"No suitable constructor found on type {typeof(TScene).FullName}.");
+        }
 
         if (Activator.CreateInstance(typeof(TScene), [this, name]) is not TScene scene)
+        {
             throw new MfxException($"Unable to initialize a new instance of type {typeof(TScene).FullName}.");
-
-        if (previousScene is null)
-            ActiveScene = scene;
-        else
-            previousScene.Next = scene;
+        }
 
         _scenes.Add(name, scene);
 
         return scene;
     }
 
+    protected TScene AddScene<TScene>() where TScene : class, IScene => AddScene<TScene>(typeof(TScene).Name);
+
     protected override void Dispose(bool disposing)
     {
         if (!_disposed)
         {
-            if (disposing && FirstScene is not null)
+            if (disposing)
             {
-                var allScenes = new List<IScene>();
-                var cur = FirstScene;
-                while (cur is not null)
-                {
-                    allScenes.Add(cur);
-                    cur = cur.Next;
-                }
-
-                allScenes.ForEach(s => s.Dispose());
+                Parallel.ForEach(_scenes, s => s.Value.Dispose());
             }
 
             base.Dispose(disposing);
@@ -155,7 +152,7 @@ public class MfxGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        if (_spriteBatch is not null && ActiveScene is not null)
+        if (_spriteBatch is not null && _activeScene is not null)
         {
             //_spriteBatch.Begin(SpriteBatchDrawOptions.SpriteSortMode,
             //    SpriteBatchDrawOptions.BlendState,
@@ -164,7 +161,7 @@ public class MfxGame : Game
             //    SpriteBatchDrawOptions.RasterizerState,
             //    SpriteBatchDrawOptions.Effect,
             //    SpriteBatchDrawOptions.TransformMatrix);
-            ActiveScene.Draw(gameTime, _spriteBatch);
+            _activeScene.Draw(gameTime, _spriteBatch);
             //_spriteBatch.End();
         }
 
@@ -173,9 +170,15 @@ public class MfxGame : Game
 
     protected override void Initialize()
     {
-        ActiveScene = FirstScene ?? throw new MfxException("FirstScene is not specified.");
+        if (_activeScene is null)
+        {
+            throw new MfxException("The current active scene is not specified.");
+        }
 
-        if (!string.IsNullOrEmpty(_settings.Title)) Window.Title = _settings.Title;
+        if (!string.IsNullOrEmpty(_settings.Title))
+        {
+            Window.Title = _settings.Title;
+        }
 
         _graphicsDeviceManager.IsFullScreen = _settings.IsFullScreen;
         if (!_settings.IsFullScreen)
@@ -196,29 +199,34 @@ public class MfxGame : Game
 
         base.Initialize();
     }
+
     protected override void LoadContent()
     {
         base.LoadContent();
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        if (FirstScene is null)
-            return;
 
-        var cur = FirstScene;
-        while (cur is not null)
+        foreach (var scene in _scenes) scene.Value.Load(Content);
+
+        _activeScene?.Enter();
+    }
+
+    protected void StartFrom(string sceneName)
+    {
+        if (!_scenes.TryGetValue(sceneName, out var scene))
         {
-            cur.Load(Content);
-            cur = cur.Next;
+            throw new MfxException($"The scene '{sceneName}' doesn't exist.");
         }
 
-        ActiveScene?.Enter();
+        _activeScene = scene;
     }
+
+    protected void StartFrom<TScene>() where TScene : class, IScene => StartFrom(typeof(TScene).Name);
 
     protected override void Update(GameTime gameTime)
     {
-        ActiveScene?.Update(gameTime);
+        _activeScene?.Update(gameTime);
         base.Update(gameTime);
     }
 
     #endregion Protected Methods
-
 }

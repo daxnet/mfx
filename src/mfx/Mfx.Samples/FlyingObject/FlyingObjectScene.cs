@@ -96,9 +96,9 @@ internal sealed class FlyingObjectScene(MfxGame game, string name) : Scene(game,
 
     public override void Update(GameTime gameTime)
     {
-        if (!Ended && Keyboard.GetState().IsKeyDown(Keys.Escape))
+        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
         {
-            End();
+            Game.Transit("EndingScene");
         }
 
         base.Update(gameTime);
