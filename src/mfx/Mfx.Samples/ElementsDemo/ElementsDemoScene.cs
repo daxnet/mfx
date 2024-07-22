@@ -31,7 +31,7 @@
 
 using Mfx.Core;
 using Mfx.Core.Elements;
-using Mfx.Core.Elements.Messages;
+using Mfx.Core.Elements.Menus;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -39,7 +39,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Mfx.Samples.ElementsDemo;
 
-internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game, name, Color.CornflowerBlue)
+internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game, name, Color.Black)
 {
     #region Private Fields
 
@@ -57,8 +57,12 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
         _labelFont = contentManager.Load<SpriteFont>("arial");
         _menuFont = contentManager.Load<SpriteFont>("times_menu");
 
-        _menu = new Menu(this, _menuFont, ["New Game", "Options", "Load From Existing Saving", "Exit"], 100, 200,
-            Color.White, Color.Red);
+        _menu = new Menu(this, _menuFont, [
+            new MenuItem("mnuNewGame", "New Game"),
+            new MenuItem("mnuOptions", "Options"),
+            new MenuItem("mnuLoadExistingSaving", "Load From Existing Saving", false),
+            new MenuItem("mnuExit", "Exit")
+        ], 100, 200, Color.White, Color.Red, Color.Gray);
 
         _selectedMenuTextLabel = new Label("", this, _labelFont, 0, 25, Color.Yellow);
 
@@ -66,19 +70,19 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
         Add(_selectedMenuTextLabel);
         Add(_menu);
 
-        Subscribe<MenuItemClickedMessage>((publisher, message) =>
+        Subscribe<MenuItemClickedMessage>((_, message) =>
         {
             // _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
-            var nextSceneName = message.MenuItem switch
+            var nextSceneName = message.MenuItemName switch
             {
-                "New Game" => "NewGameScene",
-                "Exit" => "Exit",
+                "mnuNewGame" => "NewGameScene",
+                "mnuExit" => "Exit",
                 _ => null
             };
 
             if (nextSceneName is null)
             {
-                _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
+                _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItemName}";
             }
             else if (nextSceneName == "Exit")
             {

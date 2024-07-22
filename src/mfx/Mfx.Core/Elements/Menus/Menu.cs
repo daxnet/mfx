@@ -29,31 +29,38 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Elements.Messages;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Mfx.Core.Elements;
+namespace Mfx.Core.Elements.Menus;
 
 public class Menu : VisibleComponent
 {
-
     #region Private Fields
 
-    private readonly Color _hoverColor;
     private readonly Dictionary<string, Rectangle> _itemRegions = new();
-    private readonly Color _menuColor;
+    private readonly Rectangle _menuBox;
+    private readonly MenuItem[] _menuItems;
     private readonly SpriteFont _spriteFont;
-    private string _selectedMenuItem = string.Empty;
+    private readonly MenuItemEffect _menuItemEffect;
+    private string _selectedMenuItemName = string.Empty;
 
     #endregion Private Fields
 
     #region Public Constructors
 
-    public Menu(IScene scene, SpriteFont spriteFont, string[] menuItems, float x, float y, Color menuColor,
-        Color hoverColor, float linespace = 10,
+    public Menu(IScene scene, SpriteFont spriteFont, MenuItem[] menuItems, float x, float y, Color menuItemColor,
+        Color hoverColor, Color disabledColor, float linespace = 10,
+        float margin = 5, Alignment alignment = Alignment.Center)
+        : this(scene, spriteFont, menuItems, new SimpleColorMenuItemEffect(menuItemColor, hoverColor, disabledColor), x,
+            y, linespace, margin, alignment)
+    {
+
+    }
+
+    public Menu(IScene scene, SpriteFont spriteFont, MenuItem[] menuItems, MenuItemEffect menuItemEffect, float x, float y, float linespace = 10,
         float margin = 5, Alignment alignment = Alignment.Center) : base(scene, spriteFont.Texture, x, y)
     {
         if (menuItems.Length == 0)
@@ -62,38 +69,39 @@ public class Menu : VisibleComponent
         }
 
         _spriteFont = spriteFont;
-        _menuColor = menuColor;
-        _hoverColor = hoverColor;
+        _menuItems = menuItems;
+        _menuItemEffect = menuItemEffect;
 
         var boxWidth =
-            menuItems.Select(i => _spriteFont.MeasureString(i).X)
+            menuItems.Select(i => _spriteFont.MeasureString(i.Text).X)
                 .Max() // Width of the menu block is determined by the max width of the menu
             + margin * 2; // Top and bottom margins
 
         var boxHeight =
             menuItems.Sum(i =>
-                _spriteFont.MeasureString(i)
+                _spriteFont.MeasureString(i.Text)
                     .Y) + // Height of the menu block is determined by the total height of all menu items
             margin * 2 + // Left and right margins
             linespace * (menuItems.Length - 1); // Adding up total linespaces
 
-        var menuBox = new Rectangle((int)Math.Ceiling(x), (int)Math.Ceiling(y), (int)Math.Ceiling(boxWidth), (int)Math.Ceiling(boxHeight));
+        _menuBox = new Rectangle((int)Math.Ceiling(x), (int)Math.Ceiling(y), (int)Math.Ceiling(boxWidth),
+            (int)Math.Ceiling(boxHeight));
 
         var curItemIdx = 0;
         foreach (var menuItem in menuItems)
         {
-            var size = _spriteFont.MeasureString(menuItem);
+            var size = _spriteFont.MeasureString(menuItem.Text);
             var itemX = alignment switch
             {
                 Alignment.Left => x + margin,
-                Alignment.Center => x + margin + (menuBox.Width - size.X) / 2,
-                Alignment.Right => x + menuBox.Width - margin - size.X,
+                Alignment.Center => x + margin + (_menuBox.Width - size.X) / 2,
+                Alignment.Right => x + _menuBox.Width - margin - size.X,
                 _ => 0
             };
 
             var itemY = y + margin + curItemIdx * (size.Y + linespace);
 
-            _itemRegions.Add(menuItem,
+            _itemRegions.Add(menuItem.Name,
                 new Rectangle((int)Math.Ceiling(itemX), (int)Math.Ceiling(itemY), (int)Math.Ceiling(size.X),
                     (int)Math.Ceiling(size.Y)));
 
@@ -106,13 +114,12 @@ public class Menu : VisibleComponent
     #region Public Enums
 
     /// <summary>
-    /// 
     /// </summary>
     public enum Alignment
     {
         Left,
         Center,
-        Right,
+        Right
     }
 
     #endregion Public Enums
@@ -122,18 +129,23 @@ public class Menu : VisibleComponent
     public override void Update(GameTime gameTime)
     {
         var mouseState = Mouse.GetState();
-        _selectedMenuItem = string.Empty;
+        _selectedMenuItemName = string.Empty;
         foreach (var region in _itemRegions)
-        {
             if (mouseState.X >= region.Value.X && mouseState.X <= region.Value.X + region.Value.Width &&
-                mouseState.Y >= region.Value.Y && mouseState.Y <= region.Value.Y + region.Value.Height)
+                mouseState.Y >= region.Value.Y && mouseState.Y <= region.Value.Y + region.Value.Height &&
+                (_menuItems.FirstOrDefault(mi => mi.Name == region.Key)?.Enabled ?? false))
             {
-                _selectedMenuItem = region.Key;
+                Mouse.SetCursor(MouseCursor.Hand);
+                _selectedMenuItemName = region.Key;
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
-                    Publish(new MenuItemClickedMessage(_selectedMenuItem, mouseState.X, mouseState.Y));
+                    Publish(new MenuItemClickedMessage(_selectedMenuItemName, mouseState.X, mouseState.Y));
                 }
             }
+
+        if (string.IsNullOrEmpty(_selectedMenuItemName))
+        {
+            Mouse.SetCursor(MouseCursor.Arrow);
         }
 
         base.Update(gameTime);
@@ -147,9 +159,19 @@ public class Menu : VisibleComponent
     {
         foreach (var item in _itemRegions)
         {
+            var menuItem = _menuItems.FirstOrDefault(mi => mi.Name == item.Key);
+            if (menuItem is null)
+            {
+                continue;
+            }
+
             spriteBatch.Begin();
-            spriteBatch.DrawString(_spriteFont, item.Key, new Vector2(item.Value.X, item.Value.Y),
-                string.Equals(_selectedMenuItem, item.Key) ? _hoverColor : _menuColor);
+            _menuItemEffect.DrawMenuItem(string.Equals(_selectedMenuItemName, item.Key),
+                spriteBatch,
+                _spriteFont,
+                menuItem,
+                item.Value,
+                _menuBox);
             spriteBatch.End();
         }
     }

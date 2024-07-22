@@ -50,7 +50,7 @@ public class Label : VisibleComponent
     #region Public Constructors
 
     /// <summary>
-    ///     Initializes a new instance of the <c>StaticLabel</c> class.
+    ///     Initializes a new instance of the <c>Label</c> class.
     /// </summary>
     /// <param name="text">The text to be shown on the specified scene.</param>
     /// <param name="scene">The scene on which the text should be shown.</param>
@@ -64,7 +64,23 @@ public class Label : VisibleComponent
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <c>StaticLabel</c> class.
+    ///     Initializes a new instance of the <c>Label</c> class.
+    /// </summary>
+    /// <param name="text">The text to be shown on the specified scene.</param>
+    /// <param name="scene">The scene on which the text should be shown.</param>
+    /// <param name="font">The <see cref="SpriteFont" /> instance which specifies the font of the text.</param>
+    /// <param name="options">The <see cref="RenderingOptions" /> that specifies the options for rendering the static label.</param>
+    public Label(string text, IScene scene, SpriteFont font, RenderingOptions options) : base(scene, font.Texture)
+    {
+        _font = font;
+        Text = text;
+        Collidable = false;
+        Options = options;
+        _textSize = font.MeasureString(text);
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <c>Label</c> class.
     /// </summary>
     /// <param name="text">The text to be shown on the specified scene.</param>
     /// <param name="scene">The scene on which the text should be shown.</param>
@@ -81,7 +97,7 @@ public class Label : VisibleComponent
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <c>StaticLabel</c> class.
+    ///     Initializes a new instance of the <c>Label</c> class.
     /// </summary>
     /// <param name="text">The text to be shown on the specified scene.</param>
     /// <param name="scene">The scene on which the text should be shown.</param>
@@ -122,16 +138,21 @@ public class Label : VisibleComponent
     /// </summary>
     /// <remarks>
     ///     If <c>CenterScreen</c> property of <see cref="RenderingOptions" /> has been set to true,
-    ///     this property will return the calculated X and Y coordinates. Otherwise, the user-specified
-    ///     X and Y values will be returned.
+    ///     this property will return the calculated X and Y coordinates. Otherwise, the X and Y values
+    ///     will be determined by whether the xCoordCallback and yCoordCallback constructor parameters
+    ///     were set during the initialization of the current instance. If both callback functions were specified,
+    ///     the X and Y value will be calculated with these callback functions, otherwise, user-specified
+    ///     coordinates will be used.
     /// </remarks>
     protected Vector2 DrawingPosition
     {
         get
         {
             if (Options.CenterScreen)
+            {
                 return new Vector2((Scene.Viewport.Width - _textSize.X) / 2,
                     (Scene.Viewport.Height - _textSize.Y) / 2);
+            }
 
             return new Vector2(X, Y);
         }

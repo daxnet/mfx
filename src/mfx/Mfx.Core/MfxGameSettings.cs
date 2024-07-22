@@ -41,6 +41,24 @@ public sealed class MfxGameSettings
         IsFullScreen = true
     };
 
+    public static readonly MfxGameSettings NormalScreenFixedSize = new()
+    {
+        AllowResizing = false,
+        Width = DefaultWidth,
+        Height = DefaultHeight,
+        IsFullScreen = false,
+        MouseVisible = false
+    };
+
+    public static readonly MfxGameSettings NormalScreenFixedSizeShowMouse = new()
+    {
+        AllowResizing = false,
+        Width = DefaultWidth,
+        Height = DefaultHeight,
+        IsFullScreen = false,
+        MouseVisible = true
+    };
+
     public static readonly MfxGameSettings NormalScreenShowMouse = new()
     {
         AllowResizing = true,
@@ -74,12 +92,13 @@ public sealed class MfxGameSettings
 
     #region Public Methods
 
-    public static MfxGameSettings DefaultWithTitle(string title)
+    public static MfxGameSettings DefaultWithTitle(string title, MfxGameSettings? settings = null)
     {
-        var result = NormalScreenShowMouse;
+        var result = settings ?? NormalScreenShowMouse;
         result.Title = title;
         return result;
     }
 
     #endregion Public Methods
+
 }

@@ -29,19 +29,14 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Messaging;
+namespace Mfx.Core.Elements.Menus;
 
-namespace Mfx.Core.Elements.Messages;
-
-public sealed class MenuItemClickedMessage(string menuItem, float x, float y) : Message
+/// <summary>
+/// Represents a menu item in a menu.
+/// </summary>
+/// <param name="Name">The name of the menu item, usually it will be used as an identifier.</param>
+/// <param name="Text">The text of the menu item shown on the screen.</param>
+/// <param name="Enabled">A <see cref="bool"/> value which indicates if the menu item is enabled.</param>
+public record MenuItem(string Name, string Text, bool Enabled = true)
 {
-    #region Public Properties
-
-    public string MenuItem { get; } = menuItem;
-
-    public float X { get; } = x;
-
-    public float Y { get; } = y;
-
-    #endregion Public Properties
 }
