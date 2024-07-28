@@ -76,6 +76,15 @@ public abstract class VisibleComponent(IScene scene, Texture2D? texture, float x
     public virtual int Width => Texture?.Width ?? 0;
     public virtual float X { get; set; } = x;
     public virtual float Y { get; set; } = y;
+    public virtual void OnAddedToScene(IScene scene)
+    {
+        
+    }
+
+    public virtual void OnRemovedFromScene(IScene scene)
+    {
+        
+    }
 
     #endregion Public Properties
 

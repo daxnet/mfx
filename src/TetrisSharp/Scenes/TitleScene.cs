@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace TetrisSharp.Scenes
 {
-    internal sealed class TitleScene(MfxGame game, string name) : Scene(game, name, Color.Black)
+    internal sealed class TitleScene(TetrisGame game, string name) : Scene(game, name, Color.Black)
     {
         private Menu? _menu;
         private SpriteFont? _menuFont;
@@ -27,13 +27,27 @@ namespace TetrisSharp.Scenes
             _menuFont = contentManager.Load<SpriteFont>("fonts\\menu");
             _menu = new Menu(this, _menuFont, [
                 new MenuItem("mnuNewGame", "New Game"),
-                new MenuItem("mnuLoad", "Load", false),
+                new MenuItem("mnuContinue", "Continue") { Enabled = false },
+                new MenuItem("mnuLoad", "Load") { Enabled = false },
                 new MenuItem("mnuControllerOptions", "Controller Settings"),
                 new MenuItem("mnuExit", "Exit")
-            ], 720, 230, Color.Yellow, Color.Brown, Color.Gray, alignment: Menu.Alignment.Right);
+            ], 720, 230, Color.Yellow, Color.Brown, Color.Gray, alignment: Menu.Alignment.Right)
+            {
+                Layer = int.MaxValue
+            };
+
             Add(_menu);
 
             SubscribeMessages();
+        }
+
+        public override void Enter(object? args = null)
+        {
+            var continueMenuItem = _menu?.GetMenuItem("mnuContinue");
+            if (Game is TetrisGame tg && continueMenuItem is not null)
+            {
+                continueMenuItem.Enabled = tg.CanContinue;
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -57,7 +71,10 @@ namespace TetrisSharp.Scenes
                 switch (message.MenuItemName)
                 {
                     case "mnuNewGame":
-                        Game.Transit<MainScene>();
+                        Game.Transit<GameScene>();
+                        break;
+                    case "mnuContinue":
+                        Game.Transit<GameScene>();
                         break;
                     case "mnuExit":
                         Game.Exit();

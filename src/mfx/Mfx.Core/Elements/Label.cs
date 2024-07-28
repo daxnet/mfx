@@ -165,9 +165,9 @@ public class Label : VisibleComponent
     /// <inheritdoc />
     protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        spriteBatch.Begin();
+        //spriteBatch.Begin();
         spriteBatch.DrawString(_font, Text, DrawingPosition, Options.Color);
-        spriteBatch.End();
+        //spriteBatch.End();
     }
 
     #endregion Protected Methods

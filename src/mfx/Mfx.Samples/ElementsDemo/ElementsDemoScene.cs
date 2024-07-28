@@ -60,7 +60,7 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
         _menu = new Menu(this, _menuFont, [
             new MenuItem("mnuNewGame", "New Game"),
             new MenuItem("mnuOptions", "Options"),
-            new MenuItem("mnuLoadExistingSaving", "Load From Existing Saving", false),
+            new MenuItem("mnuLoadExistingSaving", "Load From Existing Saving") { Enabled = false },
             new MenuItem("mnuExit", "Exit")
         ], 100, 200, Color.White, Color.Red, Color.Gray);
 

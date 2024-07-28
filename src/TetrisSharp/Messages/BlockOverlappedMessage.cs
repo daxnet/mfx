@@ -29,26 +29,23 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using Mfx.Core.Messaging;
+using TetrisSharp.Blocks;
 
-namespace Mfx.Core.Elements;
+namespace TetrisSharp.Messages;
 
 /// <summary>
-/// Represents a static 2D image.
+/// Represents the message which notifies that the block has been overlapped.
 /// </summary>
-public class Image(IScene scene, Texture2D? texture) : VisibleComponent(scene, texture)
+/// <param name="block">The block that triggered the message.</param>
+/// <param name="checkmate">A <see cref="bool"/> value which indicates if the game is a checkmate.</param>
+internal sealed class BlockOverlappedMessage(Block block, bool checkmate) : Message
 {
+    #region Public Properties
 
-    #region Protected Methods
+    public bool Checkmate { get; } = checkmate;
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        //spriteBatch.Begin();
-        spriteBatch.Draw(Texture, new Rectangle(0, 0, Scene.Viewport.Width, Scene.Viewport.Height), Color.White);
-        //spriteBatch.End();
-    }
+    public Block Block { get; } = block;
 
-    #endregion Protected Methods
+    #endregion Public Properties
 }

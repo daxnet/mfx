@@ -12,8 +12,10 @@ namespace TetrisSharp
             : base(MfxGameSettings.DefaultWithTitle("Tetris#", MfxGameSettings.NormalScreenFixedSizeShowMouse))
         {
             AddScene<TitleScene>();
-            AddScene<MainScene>();
+            AddScene<GameScene>();
             StartFrom<TitleScene>();
         }
+
+        public bool CanContinue { get; set; } = false;
     }
 }

@@ -36,7 +36,10 @@ namespace Mfx.Core.Elements.Menus;
 /// </summary>
 /// <param name="Name">The name of the menu item, usually it will be used as an identifier.</param>
 /// <param name="Text">The text of the menu item shown on the screen.</param>
-/// <param name="Enabled">A <see cref="bool"/> value which indicates if the menu item is enabled.</param>
-public record MenuItem(string Name, string Text, bool Enabled = true)
+public record MenuItem(string Name, string Text)
 {
+    /// <summary>
+    /// Gets or sets a <see cref="bool"/> value which indicates if the menu item is enabled.
+    /// </summary>
+    public bool Enabled { get; set; } = true;
 }

@@ -29,26 +29,12 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using Mfx.Core;
 
-namespace Mfx.Core.Elements;
+namespace TetrisSharp;
 
 /// <summary>
-/// Represents a static 2D image.
+/// Represents the error that ocurrs when running the Tetris game.
 /// </summary>
-public class Image(IScene scene, Texture2D? texture) : VisibleComponent(scene, texture)
-{
-
-    #region Protected Methods
-
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        //spriteBatch.Begin();
-        spriteBatch.Draw(Texture, new Rectangle(0, 0, Scene.Viewport.Width, Scene.Viewport.Height), Color.White);
-        //spriteBatch.End();
-    }
-
-    #endregion Protected Methods
-}
+/// <param name="message">The error message.</param>
+internal sealed class TetrisSharpException(string message) : MfxException(message);

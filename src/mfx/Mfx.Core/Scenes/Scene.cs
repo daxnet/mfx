@@ -73,9 +73,27 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
 
     #region Public Methods
 
-    public void Add(IComponent item) => _components.TryAdd(item.Id, item);
+    public void Add(IComponent item)
+    {
+        if (_components.TryAdd(item.Id, item) &&
+            item is IVisibleComponent visibleComponent)
+        {
+            visibleComponent.OnAddedToScene(this);
+        }
+    }
 
-    public void Clear() => _components.Clear();
+    public void Clear()
+    {
+        Parallel.ForEach(_components.Values, component =>
+        {
+            if (component is IVisibleComponent visibleComponent)
+            {
+                visibleComponent.OnRemovedFromScene(this);
+            }
+        });
+
+        _components.Clear();
+    }
 
     public bool Contains(IComponent item)
     {
@@ -105,7 +123,7 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
         }
     }
 
-    public virtual void Enter()
+    public virtual void Enter(object? args = null)
     {
     }
 
@@ -143,7 +161,16 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
     public void Publish<TMessage>(TMessage message) where TMessage : IMessage =>
             Game.MessageDispatcher.Dispatch(this, message);
 
-    public bool Remove(IComponent item) => _components.TryRemove(item.Id, out _);
+    public bool Remove(IComponent item)
+    {
+        var result = _components.TryRemove(item.Id, out var removedComponent);
+        if (removedComponent is IVisibleComponent visibleComponent)
+        {
+            visibleComponent.OnRemovedFromScene(this);
+        }
+
+        return result;
+    }
 
     public void Resume()
     {

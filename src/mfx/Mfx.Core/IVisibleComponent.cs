@@ -31,6 +31,7 @@
 
 using Mfx.Core.Messaging;
 using Mfx.Core.Physics;
+using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -42,6 +43,7 @@ namespace Mfx.Core;
 /// </summary>
 public interface IVisibleComponent : IComponent, IDrawable, IMessagePublisher, IMessageSubscriber
 {
+
     #region Public Properties
 
     Rectangle? BoundingBox { get; }
@@ -68,4 +70,12 @@ public interface IVisibleComponent : IComponent, IDrawable, IMessagePublisher, I
     float Y { get; set; }
 
     #endregion Public Properties
+
+    #region Public Methods
+
+    void OnAddedToScene(IScene scene);
+
+    void OnRemovedFromScene(IScene scene);
+
+    #endregion Public Methods
 }

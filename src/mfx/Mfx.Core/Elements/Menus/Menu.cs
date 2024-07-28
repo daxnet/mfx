@@ -42,9 +42,9 @@ public class Menu : VisibleComponent
 
     private readonly Dictionary<string, Rectangle> _itemRegions = new();
     private readonly Rectangle _menuBox;
+    private readonly MenuItemEffect _menuItemEffect;
     private readonly MenuItem[] _menuItems;
     private readonly SpriteFont _spriteFont;
-    private readonly MenuItemEffect _menuItemEffect;
     private string _selectedMenuItemName = string.Empty;
 
     #endregion Private Fields
@@ -57,10 +57,10 @@ public class Menu : VisibleComponent
         : this(scene, spriteFont, menuItems, new SimpleColorMenuItemEffect(menuItemColor, hoverColor, disabledColor), x,
             y, linespace, margin, alignment)
     {
-
     }
 
-    public Menu(IScene scene, SpriteFont spriteFont, MenuItem[] menuItems, MenuItemEffect menuItemEffect, float x, float y, float linespace = 10,
+    public Menu(IScene scene, SpriteFont spriteFont, MenuItem[] menuItems, MenuItemEffect menuItemEffect, float x,
+        float y, float linespace = 10,
         float margin = 5, Alignment alignment = Alignment.Center) : base(scene, spriteFont.Texture, x, y)
     {
         if (menuItems.Length == 0)
@@ -126,11 +126,22 @@ public class Menu : VisibleComponent
 
     #region Public Methods
 
+    /// <summary>
+    ///     Retrieves the <see cref="MenuItem" /> with the specified name.
+    /// </summary>
+    /// <param name="name">The name of the menu item.</param>
+    /// <returns>Menu item.</returns>
+    public MenuItem? GetMenuItem(string name)
+    {
+        return _menuItems.FirstOrDefault(mi => mi.Name == name);
+    }
+
     public override void Update(GameTime gameTime)
     {
         var mouseState = Mouse.GetState();
         _selectedMenuItemName = string.Empty;
         foreach (var region in _itemRegions)
+        {
             if (mouseState.X >= region.Value.X && mouseState.X <= region.Value.X + region.Value.Width &&
                 mouseState.Y >= region.Value.Y && mouseState.Y <= region.Value.Y + region.Value.Height &&
                 (_menuItems.FirstOrDefault(mi => mi.Name == region.Key)?.Enabled ?? false))
@@ -142,6 +153,7 @@ public class Menu : VisibleComponent
                     Publish(new MenuItemClickedMessage(_selectedMenuItemName, mouseState.X, mouseState.Y));
                 }
             }
+        }
 
         if (string.IsNullOrEmpty(_selectedMenuItemName))
         {
@@ -165,14 +177,14 @@ public class Menu : VisibleComponent
                 continue;
             }
 
-            spriteBatch.Begin();
+            //spriteBatch.Begin();
             _menuItemEffect.DrawMenuItem(string.Equals(_selectedMenuItemName, item.Key),
                 spriteBatch,
                 _spriteFont,
                 menuItem,
                 item.Value,
                 _menuBox);
-            spriteBatch.End();
+            //spriteBatch.End();
         }
     }
 

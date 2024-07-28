@@ -29,26 +29,49 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
-namespace Mfx.Core.Elements;
+namespace Mfx.Core.Input;
 
 /// <summary>
-/// Represents a static 2D image.
+///     Represents the extension methods that extend the existing <see cref="KeyboardState" /> object.
 /// </summary>
-public class Image(IScene scene, Texture2D? texture) : VisibleComponent(scene, texture)
+public static class KeyboardStateExtensions
 {
+    #region Private Fields
 
-    #region Protected Methods
+    private static readonly Dictionary<Keys, bool> _keyHeldState = new();
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
+    #endregion Private Fields
+
+    #region Public Methods
+
+    /// <summary>
+    ///     An extension method which checks if a key has been pressed once.
+    /// </summary>
+    /// <param name="state">The <see cref="KeyboardState" /> instance to be extended.</param>
+    /// <param name="keys">The <see cref="Keys" /> to be checked.</param>
+    /// <returns>True if the key has been pressed once, otherwise, false.</returns>
+    public static bool HasPressedOnce(this KeyboardState state, Keys keys)
     {
-        //spriteBatch.Begin();
-        spriteBatch.Draw(Texture, new Rectangle(0, 0, Scene.Viewport.Width, Scene.Viewport.Height), Color.White);
-        //spriteBatch.End();
+        if (state.IsKeyDown(keys))
+        {
+            if (_keyHeldState.TryGetValue(keys, out var v1) && v1)
+            {
+                return false;
+            }
+
+            _keyHeldState.TryAdd(keys, true);
+            return true;
+        }
+
+        if (_keyHeldState.TryGetValue(keys, out var v2) && v2)
+        {
+            _keyHeldState.Remove(keys);
+        }
+
+        return false;
     }
 
-    #endregion Protected Methods
+    #endregion Public Methods
 }

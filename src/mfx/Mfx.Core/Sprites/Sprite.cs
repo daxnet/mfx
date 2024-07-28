@@ -44,9 +44,9 @@ public class Sprite(IScene scene, Texture2D? texture, float x, float y) : Visibl
         if (Texture is not null)
         {
             // TODO: Refine the spriteBatch invocation.
-            spriteBatch.Begin();
+            //spriteBatch.Begin();
             spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            spriteBatch.End();
+            //spriteBatch.End();
         }
     }
 

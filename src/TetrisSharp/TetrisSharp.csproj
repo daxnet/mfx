@@ -27,6 +27,11 @@
 	<ItemGroup>
 		<ProjectReference Include="..\mfx\Mfx.Core\Mfx.Core.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Update="blocks.xml">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />
 		<Exec Command="dotnet tool restore" />

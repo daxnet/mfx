@@ -82,7 +82,7 @@ public class MfxGame : Game
     ///     Transits to a scene with the specified name.
     /// </summary>
     /// <param name="sceneName">The name of the scene to be transited to.</param>
-    public void Transit(string sceneName)
+    public void Transit(string sceneName, object? args = null)
     {
         // Gets the scene by name.
         if (!_scenes.TryGetValue(sceneName, out var target))
@@ -93,7 +93,7 @@ public class MfxGame : Game
         _activeScene?.Pause();
         _activeScene?.Leave();
 
-        target.Enter();
+        target.Enter(args);
         if (target.Paused)
         {
             target.Resume();
@@ -102,9 +102,9 @@ public class MfxGame : Game
         _activeScene = target;
     }
 
-    public void Transit<TScene>()
+    public void Transit<TScene>(object? args = null)
         where TScene : class, IScene =>
-        Transit(typeof(TScene).Name);
+        Transit(typeof(TScene).Name, args);
 
     #endregion Public Methods
 
@@ -116,7 +116,8 @@ public class MfxGame : Game
         var constructors = from p in typeof(TScene).GetConstructors()
             let parameters = p.GetParameters()
             where parameters.Length == 2 &&
-                  parameters[0].ParameterType == typeof(MfxGame) &&
+                  (parameters[0].ParameterType == typeof(MfxGame) ||
+                   parameters[0].ParameterType.IsSubclassOf(typeof(MfxGame))) &&
                   parameters[1].ParameterType == typeof(string)
             select p;
         if (!constructors.Any())
@@ -161,8 +162,9 @@ public class MfxGame : Game
             //    SpriteBatchDrawOptions.RasterizerState,
             //    SpriteBatchDrawOptions.Effect,
             //    SpriteBatchDrawOptions.TransformMatrix);
+            _spriteBatch.Begin();
             _activeScene.Draw(gameTime, _spriteBatch);
-            //_spriteBatch.End();
+            _spriteBatch.End();
         }
 
         base.Draw(gameTime);

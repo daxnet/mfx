@@ -29,26 +29,36 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml.Serialization;
 
-namespace Mfx.Core.Elements;
+namespace TetrisSharp.Blocks;
 
-/// <summary>
-/// Represents a static 2D image.
-/// </summary>
-public class Image(IScene scene, Texture2D? texture) : VisibleComponent(scene, texture)
+[XmlRoot("tetris-blocks")]
+public sealed class BlockDefinitionCollection
 {
 
-    #region Protected Methods
+    #region Public Properties
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
+    [XmlArray("blocks")]
+    [XmlArrayItem("block")]
+    public List<BlockDefinition> Definitions { get; set; } = [];
+
+    #endregion Public Properties
+
+    #region Public Methods
+
+    public static BlockDefinitionCollection LoadFromFile(string fileName)
     {
-        //spriteBatch.Begin();
-        spriteBatch.Draw(Texture, new Rectangle(0, 0, Scene.Viewport.Width, Scene.Viewport.Height), Color.White);
-        //spriteBatch.End();
+        var xmlSerializer = new XmlSerializer(typeof(BlockDefinitionCollection));
+        using var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+        return xmlSerializer.Deserialize(fileStream) as BlockDefinitionCollection
+               ??
+               throw new InvalidOperationException($"Cannot deserialize BlockDefinitionCollection object from file {fileName}");
     }
 
-    #endregion Protected Methods
+    #endregion Public Methods
 }
