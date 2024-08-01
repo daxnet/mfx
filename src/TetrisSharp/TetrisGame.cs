@@ -9,7 +9,8 @@ namespace TetrisSharp
     public class TetrisGame : MfxGame
     {
         public TetrisGame()
-            : base(MfxGameSettings.DefaultWithTitle("Tetris#", MfxGameSettings.NormalScreenFixedSizeShowMouse))
+            : base(MfxGameSettings.FromDefault("Tetris#", MfxGameSettings.NormalScreenFixedSizeShowMouse,
+                new Point(820, 768)))
         {
             AddScene<TitleScene>();
             AddScene<GameScene>();

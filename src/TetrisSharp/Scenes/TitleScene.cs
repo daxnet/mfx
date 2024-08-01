@@ -31,7 +31,7 @@ namespace TetrisSharp.Scenes
                 new MenuItem("mnuLoad", "Load") { Enabled = false },
                 new MenuItem("mnuControllerOptions", "Controller Settings"),
                 new MenuItem("mnuExit", "Exit")
-            ], 720, 230, Color.Yellow, Color.Brown, Color.Gray, alignment: Menu.Alignment.Right)
+            ], 550, 230, Color.Yellow, Color.Brown, Color.Gray, alignment: Menu.Alignment.Right)
             {
                 Layer = int.MaxValue
             };

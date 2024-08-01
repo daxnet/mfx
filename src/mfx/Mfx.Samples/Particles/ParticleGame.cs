@@ -38,7 +38,7 @@ public class ParticleGame : MfxGame
     #region Public Constructors
 
     public ParticleGame()
-        : base(MfxGameSettings.DefaultWithTitle("Particles"))
+        : base(MfxGameSettings.FromDefault("Particles"))
     {
         AddScene<ParticleScene>();
         AddScene<EndingScene>();

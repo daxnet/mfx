@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Mfx.Core;
@@ -19,7 +21,7 @@ namespace TetrisSharp.Scenes
 {
     internal sealed class GameScene : Scene, IGameScene
     {
-        private const float KeyDelay = 0.08f;
+        private const float KeyDelay = 0.09f;
         private static readonly Random _rnd = new(DateTime.Now.Millisecond);
 
         private readonly BlockGenerator _blockGenerator = new("blocks.xml");
@@ -35,10 +37,10 @@ namespace TetrisSharp.Scenes
         private Block? _nextBlock;
         private float _timeSinceLastKeyPress;
 
-        public GameScene(TetrisGame game, string name) 
-            : base(game, name, Color.Gray)
+        public GameScene(TetrisGame game, string name)
+            : base(game, name, Color.FromNonPremultiplied(0, 130, 190, 255))
         {
-            
+
         }
 
         public override void Enter(object? args = null)
@@ -68,7 +70,7 @@ namespace TetrisSharp.Scenes
             var gameboardColorData = new Color[25 * Constants.NumberOfTilesX * 25 * Constants.NumberOfTilesY];
             for (var i = 0; i < gameboardColorData.Length; i++)
             {
-                gameboardColorData[i] = Color.Black;
+                gameboardColorData[i] = Color.FromNonPremultiplied(0, 0, 0, 50);
             }
             _gameboardTexture.SetData(gameboardColorData);
             GameBoard = new GameBoard(this, _gameboardTexture, _fixedTileTexture, Constants.NumberOfTilesX,
@@ -108,6 +110,10 @@ namespace TetrisSharp.Scenes
                 {
                     _block?.Rotate();
                 }
+                else if (keyState.HasPressedOnce(Keys.K))
+                {
+                    _block?.Drop();
+                }
                 else if (keyState.HasPressedOnce(Keys.Escape))
                 {
                     Game.Transit<TitleScene>();
@@ -132,7 +138,10 @@ namespace TetrisSharp.Scenes
 
                 // Merge the block with the game board.
                 GameBoard?.Merge(block.CurrentRotation, (int)block.X, (int)block.Y, () => { });
-                var rows = GameBoard?.CleanupFilledRows(row => { });
+                var rows = GameBoard?.CleanupFilledRows(rows =>
+                {
+                    
+                });
 
                 // Remove the current block sprite from the scene.
                 Remove(block);

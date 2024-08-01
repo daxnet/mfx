@@ -29,6 +29,8 @@
 // SOFTWARE.
 // =============================================================================
 
+using Microsoft.Xna.Framework;
+
 namespace Mfx.Core;
 
 public sealed class MfxGameSettings
@@ -68,6 +70,12 @@ public sealed class MfxGameSettings
         MouseVisible = true
     };
 
+    public static readonly MfxGameSettings FullScreenShowMouse = new()
+    {
+        IsFullScreen = true,
+        MouseVisible = true
+    };
+
     #endregion Public Fields
 
     #region Private Fields
@@ -92,10 +100,15 @@ public sealed class MfxGameSettings
 
     #region Public Methods
 
-    public static MfxGameSettings DefaultWithTitle(string title, MfxGameSettings? settings = null)
+    public static MfxGameSettings FromDefault(string title, MfxGameSettings? settings = null, Point? size = null)
     {
         var result = settings ?? NormalScreenShowMouse;
         result.Title = title;
+        if (size is not null)
+        {
+            result.Width = size.Value.X;
+            result.Height = size.Value.Y;
+        }
         return result;
     }
 
