@@ -31,6 +31,7 @@
 
 using System.Collections;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using Mfx.Core.Messaging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -169,6 +170,11 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
             visibleComponent.OnRemovedFromScene(this);
         }
 
+        if (removedComponent is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
         return result;
     }
 
@@ -191,15 +197,10 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
                 .AsParallel()
                 .ForAll(component => component.Update(gameTime));
 
-            var inactiveComponentIdList = _components.Values.Where(component => !component.IsActive)
-                .Select(component => component.Id);
-            Parallel.ForEach(inactiveComponentIdList, id =>
+            var inactiveComponents = _components.Values.Where(component => !component.IsActive);
+            Parallel.ForEach(inactiveComponents, component =>
             {
-                _components.TryRemove(id, out var component);
-                if (component is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
+                Remove(component);
             });
         }
     }

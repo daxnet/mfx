@@ -44,8 +44,14 @@ namespace TetrisSharp;
 /// </summary>
 internal sealed class GameBoard : Sprite
 {
-    private readonly Texture2D _fixedTileTexture;
+    #region Private Fields
+
     private readonly int _fixedTileSize;
+    private readonly Texture2D _fixedTileTexture;
+
+    #endregion Private Fields
+
+    #region Public Constructors
 
     public GameBoard(IScene scene, Texture2D? texture, Texture2D fixedTileTexture, int numOfTilesX, int numOfTilesY, float x, float y)
         : base(scene, texture, x, y)
@@ -56,6 +62,8 @@ internal sealed class GameBoard : Sprite
         Height = numOfTilesY;
         BoardMatrix = new int[numOfTilesX, numOfTilesY];
     }
+
+    #endregion Public Constructors
 
     #region Public Properties
 
@@ -146,7 +154,20 @@ internal sealed class GameBoard : Sprite
         mergeCallback();
     }
 
+    public void Reset()
+    {
+        for (var x = 0; x < Width; x++)
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                BoardMatrix[x, y] = 0;
+            }
+        }
+    }
+
     #endregion Public Methods
+
+    #region Protected Methods
 
     protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
     {
@@ -164,4 +185,6 @@ internal sealed class GameBoard : Sprite
             }
         }
     }
+
+    #endregion Protected Methods
 }

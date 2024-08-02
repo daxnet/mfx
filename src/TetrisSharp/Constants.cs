@@ -15,5 +15,7 @@ namespace TetrisSharp
         public const int RowsForLevelUp = 30;
         public const float BgmVolume = 0.2F;
         public const float SoundVolume = 0.1F;
+        public const string NewGameFlag = "NewGame";
+        public const string ContinueGameFlag = "ContinueGame";
     }
 }

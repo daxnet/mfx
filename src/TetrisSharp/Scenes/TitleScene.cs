@@ -33,7 +33,7 @@ namespace TetrisSharp.Scenes
                 new MenuItem("mnuExit", "Exit")
             ], 550, 230, Color.Yellow, Color.Brown, Color.Gray, alignment: Menu.Alignment.Right)
             {
-                Layer = int.MaxValue
+                Layer = int.MaxValue // Put the menu on top
             };
 
             Add(_menu);
@@ -50,15 +50,6 @@ namespace TetrisSharp.Scenes
             }
         }
 
-        public override void Update(GameTime gameTime)
-        {
-            //if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-            //{
-            //    Game.Exit();
-            //}
-            base.Update(gameTime);
-        }
-
         public override void Leave()
         {
             Mouse.SetCursor(MouseCursor.Arrow);
@@ -71,10 +62,10 @@ namespace TetrisSharp.Scenes
                 switch (message.MenuItemName)
                 {
                     case "mnuNewGame":
-                        Game.Transit<GameScene>();
+                        Game.Transit<GameScene>(Constants.NewGameFlag);
                         break;
                     case "mnuContinue":
-                        Game.Transit<GameScene>();
+                        Game.Transit<GameScene>(Constants.ContinueGameFlag);
                         break;
                     case "mnuExit":
                         Game.Exit();

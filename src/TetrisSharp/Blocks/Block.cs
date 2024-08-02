@@ -30,8 +30,7 @@
 // =============================================================================
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using Mfx.Core.Scenes;
 using Mfx.Core.Sprites;
 using Microsoft.Xna.Framework;
@@ -42,7 +41,7 @@ using TetrisSharp.Scenes;
 namespace TetrisSharp.Blocks;
 
 /// <summary>
-/// Represents a Block in the Tetris game.
+///     Represents a Block in the Tetris game.
 /// </summary>
 internal sealed class Block : Sprite
 {
@@ -119,15 +118,15 @@ internal sealed class Block : Sprite
     #region Public Properties
 
     /// <summary>
-    /// Gets the current rotation of the block. If no rotations have been defined
-    /// in the block definition, <see cref="TetrisSharpException"/> will be thrown.
+    ///     Gets the current rotation of the block. If no rotations have been defined
+    ///     in the block definition, <see cref="TetrisSharpException" /> will be thrown.
     /// </summary>
     public BlockRotation CurrentRotation => _blockDefinition.Rotations?[_currentRotationIndex] ??
                                             throw new TetrisSharpException(
                                                 "A block definition should have at least one rotation definition.");
 
     /// <summary>
-    /// Gets or sets the interval of the falling of the block.
+    ///     Gets or sets the interval of the falling of the block.
     /// </summary>
     public TimeSpan FallingInterval { get; set; } = TimeSpan.FromMilliseconds(1000);
 
@@ -144,7 +143,6 @@ internal sealed class Block : Sprite
     }
 
     #endregion Public Properties
-
 
     #region Private Properties
 
@@ -326,7 +324,6 @@ internal sealed class Block : Sprite
         {
             _y = Constants.NumberOfTilesY - CurrentRotation.Height;
         }
-
     }
 
     public override void Update(GameTime gameTime)
@@ -386,11 +383,15 @@ internal sealed class Block : Sprite
 
                 spriteBatch.Draw(_tileTexture, new Vector2(posX, posY), Color.White);
 
-                if (_isActiveBlock)
+                if (!_isActiveBlock)
                 {
-                    var shadowY = (GetShadowY() + tileY) * _tileSize + _boardY;
-                    spriteBatch.Draw(_tileTexture, new Vector2(posX, shadowY), Color.Aqua);
+                    // If the current block is not an active block, or the block doesn't
+                    // require to show the navigator, then skip rendering the navigator.
+                    continue;
                 }
+
+                var navYPos = (GetNavigatorYPos() + tileY) * _tileSize + _boardY;
+                spriteBatch.Draw(_tileTexture, new Vector2(posX, navYPos), Color.White * 0.15f);
             }
         }
 
@@ -400,6 +401,34 @@ internal sealed class Block : Sprite
     #endregion Protected Methods
 
     #region Private Methods
+
+    private int GetNavigatorYPos()
+    {
+        if (_blockDefinition.Rotations is null)
+        {
+            throw new TetrisSharpException(
+                "A block definition should have at least one rotation definition.");
+        }
+
+        var minY = int.MaxValue;
+        foreach (var point in CurrentRotation.BottomEdge)
+        {
+            for (var y = _y; y < Constants.NumberOfTilesY; y++)
+            {
+                if (IsColliding(point.X + _x, point.Y + y))
+                {
+                    minY = minY < y ? minY : y;
+                }
+            }
+        }
+
+        return minY;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsColliding(int x, int y) =>
+        y + 1 >= Constants.NumberOfTilesY ||
+        _gameScene.GameBoard?.BoardMatrix[x, y + 1] == 1;
 
     private bool IsOverlapped()
     {
@@ -414,48 +443,15 @@ internal sealed class Block : Sprite
                 "A block definition should have at least one rotation definition.");
         }
 
-        //var currentRotation = _blockDefinition.Rotations[_currentRotationIndex];
         foreach (var point in CurrentRotation.BottomEdge)
         {
-            var posX = point.X + _x;
-            var posY = point.Y + _y;
-            if (posY + 1 >= Constants.NumberOfTilesY ||
-                _gameScene.GameBoard?.BoardMatrix[posX, posY + 1] == 1)
+            if (IsColliding(point.X + _x, point.Y + _y))
             {
                 return true;
             }
         }
 
         return false;
-    }
-
-    private int GetShadowY()
-    {
-        if (_blockDefinition.Rotations is null)
-        {
-            throw new TetrisSharpException(
-                "A block definition should have at least one rotation definition.");
-        }
-
-        // var currentRotation = _blockDefinition.Rotations[_currentRotationIndex];
-        var l = new List<int>();
-        foreach (var point in CurrentRotation.BottomEdge)
-        {
-            for (var y = _y; y < Constants.NumberOfTilesY; y++)
-            {
-                var posX = point.X + _x;
-                var posY = point.Y + y;
-                if (posY + 1 >= Constants.NumberOfTilesY ||
-                    _gameScene.GameBoard?.BoardMatrix[posX, posY + 1] == 1)
-                {
-                    // return y;
-                    l.Add(y);
-                }
-            }
-        }
-
-
-        return l.Count > 0 ? l.Min() : -1;
     }
 
     #endregion Private Methods
