@@ -76,7 +76,7 @@ public sealed class BlockRotation
 
     [XmlIgnore] public int Height { get; private set; }
 
-    [XmlIgnore] public int[,]? Matrix { get; private set; }
+    [XmlIgnore] public byte[,]? Matrix { get; private set; }
 
     [XmlElement("definition")]
     public string? RotationDefinition
@@ -98,12 +98,12 @@ public sealed class BlockRotation
 
             Width = splitted[0].Length;
             Height = splitted.Length;
-            Matrix = new int[Width, Height];
+            Matrix = new byte[Width, Height];
             for (var y = 0; y < Height; y++)
             {
                 for (var x = 0; x < Width; x++)
                 {
-                    Matrix[x, y] = Convert.ToInt32(splitted[y][x].ToString());
+                    Matrix[x, y] = Convert.ToByte(splitted[y][x].ToString());
                 }
             }
         }

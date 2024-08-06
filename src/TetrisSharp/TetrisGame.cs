@@ -14,9 +14,15 @@ namespace TetrisSharp
         {
             AddScene<TitleScene>();
             AddScene<GameScene>();
+            AddScene<ControllerSettingScene>();
             StartFrom<TitleScene>();
         }
 
         public bool CanContinue { get; set; } = false;
+
+        protected override void LoadContent()
+        {
+            base.LoadContent();
+        }
     }
 }

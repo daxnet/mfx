@@ -7,7 +7,9 @@ using Mfx.Core;
 using Mfx.Core.Elements;
 using Mfx.Core.Elements.Menus;
 using Mfx.Core.Scenes;
+using Mfx.Core.Sounds;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -18,9 +20,17 @@ namespace TetrisSharp.Scenes
     {
         private Menu? _menu;
         private SpriteFont? _menuFont;
+        private BackgroundMusic? _bgm;
+        private SoundEffect? _bgmEffect;
+        private bool _disposed;
 
         public override void Load(ContentManager contentManager)
         {
+            // Background music
+            _bgmEffect = contentManager.Load<SoundEffect>(@"sounds\opening");
+            _bgm = new([_bgmEffect], .2f);
+
+            // Background images
             var backgroundImageTexture = contentManager.Load<Texture2D>("images\\title");
             Add(new Image(this, backgroundImageTexture));
 
@@ -37,6 +47,7 @@ namespace TetrisSharp.Scenes
             };
 
             Add(_menu);
+            Add(_bgm);
 
             SubscribeMessages();
         }
@@ -44,15 +55,18 @@ namespace TetrisSharp.Scenes
         public override void Enter(object? args = null)
         {
             var continueMenuItem = _menu?.GetMenuItem("mnuContinue");
-            if (Game is TetrisGame tg && continueMenuItem is not null)
+            if (continueMenuItem is not null)
             {
-                continueMenuItem.Enabled = tg.CanContinue;
+                continueMenuItem.Enabled = GameAs<TetrisGame>().CanContinue;
             }
+
+            _bgm?.Play();
         }
 
         public override void Leave()
         {
             Mouse.SetCursor(MouseCursor.Arrow);
+            _bgm?.Stop();
         }
 
         private void SubscribeMessages()
@@ -67,11 +81,30 @@ namespace TetrisSharp.Scenes
                     case "mnuContinue":
                         Game.Transit<GameScene>(Constants.ContinueGameFlag);
                         break;
+                    case "mnuControllerOptions":
+                        Game.Transit<ControllerSettingScene>();
+                        break;
                     case "mnuExit":
                         Game.Exit();
                         break;
                 }
             });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _bgm?.Stop();
+
+                    _bgmEffect?.Dispose();
+                }
+
+                base.Dispose(disposing);
+                _disposed = true;
+            }
         }
     }
 }

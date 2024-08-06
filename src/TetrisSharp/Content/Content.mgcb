@@ -39,6 +39,36 @@
 /processorParam:TextureFormat=Color
 /build:images/title.png
 
+#begin sounds/bgm.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/bgm.mp3
+
+#begin sounds/gameover.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/gameover.mp3
+
+#begin sounds/merge.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/merge.mp3
+
+#begin sounds/opening.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/opening.mp3
+
+#begin sounds/remove_row.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sounds/remove_row.mp3
+
 #begin tiles/1.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -40,36 +40,32 @@ using TetrisSharp.Blocks;
 namespace TetrisSharp;
 
 /// <summary>
-/// Represents the game board.
+///     Represents the game board.
 /// </summary>
-internal sealed class GameBoard : Sprite
+internal sealed class GameBoard(
+    IScene scene,
+    Texture2D? texture,
+    Texture2D fixedTileTexture,
+    int numOfTilesX,
+    int numOfTilesY,
+    float x,
+    float y)
+    : Sprite(scene, texture, x, y)
 {
     #region Private Fields
 
-    private readonly int _fixedTileSize;
-    private readonly Texture2D _fixedTileTexture;
+    private readonly int _fixedTileSize = fixedTileTexture.Width;
 
     #endregion Private Fields
 
-    #region Public Constructors
-
-    public GameBoard(IScene scene, Texture2D? texture, Texture2D fixedTileTexture, int numOfTilesX, int numOfTilesY, float x, float y)
-        : base(scene, texture, x, y)
-    {
-        _fixedTileTexture = fixedTileTexture;
-        _fixedTileSize = fixedTileTexture.Width;
-        Width = numOfTilesX;
-        Height = numOfTilesY;
-        BoardMatrix = new int[numOfTilesX, numOfTilesY];
-    }
-
-    #endregion Public Constructors
-
     #region Public Properties
 
-    public int[,] BoardMatrix { get; }
+    /// <summary>
+    ///     Gets a <see cref="byte" /> array which represents the values on the game board.
+    /// </summary>
+    public byte[,] BoardMatrix { get; } = new byte[numOfTilesX, numOfTilesY];
 
-    public override int Height { get; }
+    public override int Height { get; } = numOfTilesY;
 
     /// <summary>
     ///     Gets the index of the lines that are ready to be removed.
@@ -97,12 +93,17 @@ internal sealed class GameBoard : Sprite
         }
     }
 
-    public override int Width { get; }
+    public override int Width { get; } = numOfTilesX;
 
     #endregion Public Properties
 
     #region Public Methods
 
+    /// <summary>
+    ///     Cleans up all filled rows on the game board.
+    /// </summary>
+    /// <param name="beforeRemoveRowCallback">The method that will be called before the rows is going to be removed.</param>
+    /// <returns>Number of rows removed from the game board.</returns>
     public int CleanupFilledRows(Action<int> beforeRemoveRowCallback)
     {
         var rows = 0;
@@ -136,6 +137,13 @@ internal sealed class GameBoard : Sprite
         return rows;
     }
 
+    /// <summary>
+    ///     Merges the block rotation into the game board.
+    /// </summary>
+    /// <param name="rotation">The <see cref="BlockRotation" /> of the block which is going to be merged into the game board.</param>
+    /// <param name="x">The X coordinate of the block rotation.</param>
+    /// <param name="y">The y coordinate of the block rotation.</param>
+    /// <param name="mergeCallback">The method that will be called before the block rotation is merged.</param>
     public void Merge(BlockRotation rotation, int x, int y, Action mergeCallback)
     {
         for (var tileY = 0; tileY < rotation.Height; tileY++)
@@ -154,6 +162,9 @@ internal sealed class GameBoard : Sprite
         mergeCallback();
     }
 
+    /// <summary>
+    ///     Resets the game board.
+    /// </summary>
     public void Reset()
     {
         for (var x = 0; x < Width; x++)
@@ -180,7 +191,7 @@ internal sealed class GameBoard : Sprite
                 {
                     var px = bx * _fixedTileSize + X;
                     var py = by * _fixedTileSize + Y;
-                    spriteBatch.Draw(_fixedTileTexture, new Vector2(px, py), Color.White);
+                    spriteBatch.Draw(fixedTileTexture, new Vector2(px, py), Color.White);
                 }
             }
         }

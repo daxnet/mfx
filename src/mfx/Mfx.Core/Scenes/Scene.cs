@@ -217,6 +217,16 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
         }
     }
 
+    protected T GameAs<T>() where T : MfxGame
+    {
+        if (Game is T g)
+        {
+            return g;
+        }
+
+        throw new InvalidCastException($"Current Game instance can't be casted to {typeof(T).Name}.");
+    }
+
     protected virtual void OnPaused()
     {
     }
