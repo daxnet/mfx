@@ -32,7 +32,7 @@
 		<ProjectReference Include="..\mfx\Mfx.Core\Mfx.Core.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <None Update="blocks.xml">
+	  <None Update="blocks.txt">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="res\main.ttf">

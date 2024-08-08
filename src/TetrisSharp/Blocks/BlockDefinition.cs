@@ -45,22 +45,18 @@ public sealed class BlockDefinition
     ///     Gets or sets the description of the block definition.
     /// </summary>
     /// <remarks>The description can be empty.</remarks>
-    [XmlElement("description", IsNullable = true)]
     public string? Description { get; set; }
 
     /// <summary>
     ///     Gets or sets the name of the block definition.
     /// </summary>
-    [XmlElement("name")]
     public string? Name { get; set; }
 
     /// <summary>
     ///     Gets or sets a list of <see cref="BlockRotation" />s which
     ///     represents the available rotation variants of the current block.
     /// </summary>
-    [XmlArray("rotations")]
-    [XmlArrayItem("rotation")]
-    public List<BlockRotation>? Rotations { get; set; }
+    public List<BlockRotation> Rotations { get; set; } = [];
 
     #endregion Public Properties
 
