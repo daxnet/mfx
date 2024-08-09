@@ -29,42 +29,18 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Fonts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Elements.Menus;
+namespace Mfx.Core.Fonts;
 
-/// <summary>
-///     Represents the based class of menu item effects.
-/// </summary>
-public abstract class MenuItemEffect
+public static class SpriteBatchExtensions
 {
     #region Public Methods
 
-    /// <summary>
-    ///     Draws the menu item with the given parameters.
-    /// </summary>
-    /// <param name="hovering">
-    ///     Indicates if the mouse cursor is currectly hovering over the menu item.
-    /// </param>
-    /// <param name="spriteBatch">
-    ///     The <see cref="SpriteBatch" /> instance which is responsible for drawing the menu item.
-    /// </param>
-    /// <param name="menuItemFontAdapter">
-    ///     The <see cref="IFontAdapter" /> that delegates the rendering of the menu item font to an underlying font object.
-    /// </param>
-    /// <param name="menuItem">The <see cref="MenuItem" /> to be drawn.</param>
-    /// <param name="menuItemRect">
-    ///     The <see cref="Rectangle" /> which represents the rectangle area where the menu item
-    ///     could be drawn.
-    /// </param>
-    /// <param name="menuRect">
-    ///     The <see cref="Rectangle" /> which represents the rectangle area of the entire menu.
-    /// </param>
-    public abstract void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, IFontAdapter menuItemFontAdapter,
-        MenuItem menuItem,
-        Rectangle menuItemRect, Rectangle menuRect);
+    public static void DrawString(this SpriteBatch spriteBatch, IFontAdapter fontAdapter, string text,
+        Vector2 position, Color color) =>
+        fontAdapter.DrawString(spriteBatch, text, position, color);
 
     #endregion Public Methods
 }

@@ -30,6 +30,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\mfx\Mfx.Core\Mfx.Core.csproj" />
+		<ProjectReference Include="..\mfx\Mfx.Extended.FontStashSharp\Mfx.Extended.FontStashSharp.csproj" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Update="blocks.txt">
@@ -38,6 +39,9 @@
 	  <None Update="res\main.ttf">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Content\tiles\" />
 	</ItemGroup>
 	<Target Name="RestoreDotnetTools" BeforeTargets="Restore">
 		<Message Text="Restoring dotnet tools" Importance="High" />

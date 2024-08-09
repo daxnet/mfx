@@ -8,7 +8,7 @@ namespace TetrisSharp
 {
     internal sealed class Constants
     {
-        public const int TileTextureCount = 12;
+        public const int TileTextureCount = 11;
         public const int NumberOfTilesX = 15;
         public const int NumberOfTilesY = 28;
         public const int ScoreBoardWidth = 255;

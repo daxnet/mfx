@@ -29,6 +29,7 @@
 // SOFTWARE.
 // =============================================================================
 
+using Mfx.Core.Fonts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -46,11 +47,11 @@ public sealed class SimpleColorMenuItemEffect(Color menuItemColor, Color hoverCo
     #region Public Methods
 
     /// <inheritdoc />
-    public override void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, SpriteFont menuItemFont,
+    public override void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, IFontAdapter menuItemFontAdapter,
         MenuItem menuItem,
         Rectangle menuItemRect, Rectangle menuRect)
     {
-        spriteBatch.DrawString(menuItemFont,
+        spriteBatch.DrawString(menuItemFontAdapter,
             menuItem.Text,
             new Vector2(menuItemRect.X, menuItemRect.Y),
             menuItem.Enabled ? hovering ? hoverColor : menuItemColor : disabledColor);

@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FontStashSharp;
 using Mfx.Core;
 using Mfx.Core.Elements;
 using Mfx.Core.Elements.Menus;
 using Mfx.Core.Scenes;
 using Mfx.Core.Sounds;
+using Mfx.Extended.FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -18,14 +21,20 @@ namespace TetrisSharp.Scenes
 {
     internal sealed class TitleScene(TetrisGame game, string name) : Scene(game, name, Color.Black)
     {
+        private readonly FontSystem _fontSystem = new();
+
         private Menu? _menu;
-        private SpriteFont? _menuFont;
+        private DynamicSpriteFont? _menuFont;
         private BackgroundMusic? _bgm;
         private SoundEffect? _bgmEffect;
         private bool _disposed;
 
         public override void Load(ContentManager contentManager)
         {
+            // Fonts
+            _fontSystem.AddFont(File.ReadAllBytes(@"res\main.ttf"));
+            _menuFont = _fontSystem.GetFont(30);
+
             // Background music
             _bgmEffect = contentManager.Load<SoundEffect>(@"sounds\opening");
             _bgm = new([_bgmEffect], .2f);
@@ -34,14 +43,13 @@ namespace TetrisSharp.Scenes
             var backgroundImageTexture = contentManager.Load<Texture2D>("images\\title");
             Add(new Image(this, backgroundImageTexture));
 
-            _menuFont = contentManager.Load<SpriteFont>("fonts\\menu");
-            _menu = new Menu(this, _menuFont, [
+            _menu = new Menu(this, new FontStashSharpAdapter(_menuFont), [
                 new MenuItem("mnuNewGame", "New Game"),
                 new MenuItem("mnuContinue", "Continue") { Enabled = false },
                 new MenuItem("mnuLoad", "Load") { Enabled = false },
                 new MenuItem("mnuControllerOptions", "Controller Settings"),
                 new MenuItem("mnuExit", "Exit")
-            ], 550, 230, Color.Yellow, Color.Brown, Color.Gray, alignment: Menu.Alignment.Right)
+            ], 510, 230, Color.FromNonPremultiplied(0, 130, 190, 255), Color.Brown, Color.Gray, alignment: Menu.Alignment.Right)
             {
                 Layer = int.MaxValue // Put the menu on top
             };
@@ -98,8 +106,8 @@ namespace TetrisSharp.Scenes
                 if (disposing)
                 {
                     _bgm?.Stop();
-
                     _bgmEffect?.Dispose();
+                    _fontSystem.Dispose();
                 }
 
                 base.Dispose(disposing);

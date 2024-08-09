@@ -29,6 +29,7 @@
 // SOFTWARE.
 // =============================================================================
 
+using Mfx.Core.Fonts;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -44,7 +45,7 @@ public class Menu : VisibleComponent
     private readonly Rectangle _menuBox;
     private readonly MenuItemEffect _menuItemEffect;
     private readonly MenuItem[] _menuItems;
-    private readonly SpriteFont _spriteFont;
+    private readonly IFontAdapter _fontAdapter;
     private string _selectedMenuItemName = string.Empty;
 
     #endregion Private Fields
@@ -54,32 +55,49 @@ public class Menu : VisibleComponent
     public Menu(IScene scene, SpriteFont spriteFont, MenuItem[] menuItems, float x, float y, Color menuItemColor,
         Color hoverColor, Color disabledColor, float linespace = 10,
         float margin = 5, Alignment alignment = Alignment.Center)
-        : this(scene, spriteFont, menuItems, new SimpleColorMenuItemEffect(menuItemColor, hoverColor, disabledColor), x,
+        : this(scene, new SpriteFontAdapter(spriteFont), menuItems, x, y, menuItemColor, hoverColor, disabledColor,
+            linespace, margin, alignment)
+    {
+
+    }
+
+    public Menu(IScene scene, IFontAdapter fontAdapter, MenuItem[] menuItems, float x, float y, Color menuItemColor,
+        Color hoverColor, Color disabledColor, float linespace = 10,
+        float margin = 5, Alignment alignment = Alignment.Center)
+        : this(scene, fontAdapter, menuItems, new SimpleColorMenuItemEffect(menuItemColor, hoverColor, disabledColor), x,
             y, linespace, margin, alignment)
     {
     }
 
     public Menu(IScene scene, SpriteFont spriteFont, MenuItem[] menuItems, MenuItemEffect menuItemEffect, float x,
         float y, float linespace = 10,
-        float margin = 5, Alignment alignment = Alignment.Center) : base(scene, spriteFont.Texture, x, y)
+        float margin = 5, Alignment alignment = Alignment.Center)
+        : this(scene, new SpriteFontAdapter(spriteFont), menuItems, menuItemEffect, x, y, linespace, margin, alignment)
+    {
+
+    }
+
+    public Menu(IScene scene, IFontAdapter fontAdapter, MenuItem[] menuItems, MenuItemEffect menuItemEffect, float x,
+        float y, float linespace = 10,
+        float margin = 5, Alignment alignment = Alignment.Center) : base(scene, null, x, y)
     {
         if (menuItems.Length == 0)
         {
             throw new ArgumentException("No menu item has been added to the menu.", nameof(menuItems));
         }
 
-        _spriteFont = spriteFont;
+        _fontAdapter = fontAdapter;
         _menuItems = menuItems;
         _menuItemEffect = menuItemEffect;
 
         var boxWidth =
-            menuItems.Select(i => _spriteFont.MeasureString(i.Text).X)
+            menuItems.Select(i => _fontAdapter.MeasureString(i.Text).X)
                 .Max() // Width of the menu block is determined by the max width of the menu
             + margin * 2; // Top and bottom margins
 
         var boxHeight =
             menuItems.Sum(i =>
-                _spriteFont.MeasureString(i.Text)
+                _fontAdapter.MeasureString(i.Text)
                     .Y) + // Height of the menu block is determined by the total height of all menu items
             margin * 2 + // Left and right margins
             linespace * (menuItems.Length - 1); // Adding up total linespaces
@@ -90,7 +108,7 @@ public class Menu : VisibleComponent
         var curItemIdx = 0;
         foreach (var menuItem in menuItems)
         {
-            var size = _spriteFont.MeasureString(menuItem.Text);
+            var size = _fontAdapter.MeasureString(menuItem.Text);
             var itemX = alignment switch
             {
                 Alignment.Left => x + margin,
@@ -180,7 +198,7 @@ public class Menu : VisibleComponent
             //spriteBatch.Begin();
             _menuItemEffect.DrawMenuItem(string.Equals(_selectedMenuItemName, item.Key),
                 spriteBatch,
-                _spriteFont,
+                _fontAdapter,
                 menuItem,
                 item.Value,
                 _menuBox);
