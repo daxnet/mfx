@@ -58,7 +58,7 @@ internal sealed class GameScene : Scene, IGameScene
     private const float KeyDelay = 0.09f;
     private static readonly Random _rnd = new(DateTime.Now.Millisecond);
 
-    private readonly BlockGenerator _blockGenerator = new("blocks.xml");
+    private readonly BlockGenerator _blockGenerator = new("blocks.txt");
     private readonly FontSystem _mainFontSystem = new();
     private readonly Queue<int> _tetrisQueue = new();
     private readonly Texture2D[] _tileTextures = new Texture2D[Constants.TileTextureCount];

@@ -37,14 +37,11 @@ using System.Xml.Serialization;
 
 namespace TetrisSharp.Blocks;
 
-[XmlRoot("tetris-blocks")]
 public sealed class BlockDefinitionCollection
 {
 
     #region Public Properties
 
-    [XmlArray("blocks")]
-    [XmlArrayItem("block")]
     public List<BlockDefinition> Definitions { get; set; } = [];
 
     #endregion Public Properties
@@ -53,11 +50,54 @@ public sealed class BlockDefinitionCollection
 
     public static BlockDefinitionCollection LoadFromFile(string fileName)
     {
-        var xmlSerializer = new XmlSerializer(typeof(BlockDefinitionCollection));
-        using var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-        return xmlSerializer.Deserialize(fileStream) as BlockDefinitionCollection
-               ??
-               throw new InvalidOperationException($"Cannot deserialize BlockDefinitionCollection object from file {fileName}");
+        using var fileStream = File.OpenRead(fileName);
+        using var streamReader = new StreamReader(fileStream);
+        var result = new BlockDefinitionCollection();
+        var curBlockName = string.Empty;
+        var rotationDefinitions = new List<string>();
+        while (!streamReader.EndOfStream)
+        {
+            var line = streamReader.ReadLine()?.Trim();
+            if (!string.IsNullOrEmpty(line))
+            {
+                if (line.StartsWith('#'))
+                {
+                    continue;
+                }
+
+                if (line.StartsWith("block", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var lineValues = line.Split(' ');
+                    if (lineValues.Length < 2)
+                    {
+                        throw new TetrisSharpException($"Unable to parse block definition file {fileName}.");
+                    }
+
+                    curBlockName = lineValues[1].Trim('"');
+                }
+                else if (string.Equals(line, "end block", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var definition = new BlockDefinition
+                    {
+                        Name = curBlockName
+                    };
+
+                    foreach (var rotationDefinition in rotationDefinitions)
+                    {
+                        definition.Rotations.Add(new BlockRotation { RotationDefinition = rotationDefinition });
+                    }
+
+                    result.Definitions.Add(definition);
+                    rotationDefinitions.Clear();
+                }
+                else
+                {
+                    rotationDefinitions.Add(line.Trim());
+                }
+            }
+        }
+
+        return result;
     }
 
     #endregion Public Methods

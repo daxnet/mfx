@@ -29,41 +29,36 @@
 // SOFTWARE.
 // =============================================================================
 
-using System.Collections.Generic;
-using System.Xml.Serialization;
+using FontStashSharp;
+using Mfx.Core.Fonts;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace TetrisSharp.Blocks;
+namespace Mfx.Extended.FontStashSharp;
 
-/// <summary>
-///     Represents a block definition.
-/// </summary>
-public sealed class BlockDefinition
+public sealed class FontStashSharpAdapter : IFontAdapter
 {
-    #region Public Properties
+    #region Private Fields
 
-    /// <summary>
-    ///     Gets or sets the description of the block definition.
-    /// </summary>
-    /// <remarks>The description can be empty.</remarks>
-    public string? Description { get; set; }
+    private readonly DynamicSpriteFont _spriteFont;
 
-    /// <summary>
-    ///     Gets or sets the name of the block definition.
-    /// </summary>
-    public string? Name { get; set; }
+    #endregion Private Fields
 
-    /// <summary>
-    ///     Gets or sets a list of <see cref="BlockRotation" />s which
-    ///     represents the available rotation variants of the current block.
-    /// </summary>
-    public List<BlockRotation> Rotations { get; set; } = [];
+    #region Public Constructors
 
-    #endregion Public Properties
+    public FontStashSharpAdapter(DynamicSpriteFont spriteFont)
+    {
+        _spriteFont = spriteFont;
+    }
+
+    #endregion Public Constructors
 
     #region Public Methods
 
-    /// <inheritdoc />
-    public override string? ToString() => Name;
+    public void DrawString(SpriteBatch spriteBatch, string text, Vector2 position, Color color)
+        => spriteBatch.DrawString(_spriteFont, text, position, color);
+
+    public Vector2 MeasureString(string text) => _spriteFont.MeasureString(text);
 
     #endregion Public Methods
 }

@@ -29,41 +29,18 @@
 // SOFTWARE.
 // =============================================================================
 
-using System.Collections.Generic;
-using System.Xml.Serialization;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace TetrisSharp.Blocks;
+namespace Mfx.Core.Fonts;
 
-/// <summary>
-///     Represents a block definition.
-/// </summary>
-public sealed class BlockDefinition
+public static class SpriteBatchExtensions
 {
-    #region Public Properties
-
-    /// <summary>
-    ///     Gets or sets the description of the block definition.
-    /// </summary>
-    /// <remarks>The description can be empty.</remarks>
-    public string? Description { get; set; }
-
-    /// <summary>
-    ///     Gets or sets the name of the block definition.
-    /// </summary>
-    public string? Name { get; set; }
-
-    /// <summary>
-    ///     Gets or sets a list of <see cref="BlockRotation" />s which
-    ///     represents the available rotation variants of the current block.
-    /// </summary>
-    public List<BlockRotation> Rotations { get; set; } = [];
-
-    #endregion Public Properties
-
     #region Public Methods
 
-    /// <inheritdoc />
-    public override string? ToString() => Name;
+    public static void DrawString(this SpriteBatch spriteBatch, IFontAdapter fontAdapter, string text,
+        Vector2 position, Color color) =>
+        fontAdapter.DrawString(spriteBatch, text, position, color);
 
     #endregion Public Methods
 }

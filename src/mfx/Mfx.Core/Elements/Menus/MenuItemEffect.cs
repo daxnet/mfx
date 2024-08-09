@@ -29,6 +29,7 @@
 // SOFTWARE.
 // =============================================================================
 
+using Mfx.Core.Fonts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -50,8 +51,8 @@ public abstract class MenuItemEffect
     /// <param name="spriteBatch">
     ///     The <see cref="SpriteBatch" /> instance which is responsible for drawing the menu item.
     /// </param>
-    /// <param name="menuItemFont">
-    ///     The <see cref="SpriteFont" /> that represents the font for drawing the menu item.
+    /// <param name="menuItemFontAdapter">
+    ///     The <see cref="IFontAdapter" /> that delegates the rendering of the menu item font to an underlying font object.
     /// </param>
     /// <param name="menuItem">The <see cref="MenuItem" /> to be drawn.</param>
     /// <param name="menuItemRect">
@@ -61,7 +62,7 @@ public abstract class MenuItemEffect
     /// <param name="menuRect">
     ///     The <see cref="Rectangle" /> which represents the rectangle area of the entire menu.
     /// </param>
-    public abstract void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, SpriteFont menuItemFont,
+    public abstract void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, IFontAdapter menuItemFontAdapter,
         MenuItem menuItem,
         Rectangle menuItemRect, Rectangle menuRect);
 

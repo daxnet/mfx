@@ -20,13 +20,6 @@
 /processorParam:TextureFormat=Compressed
 /build:fonts/arial.spritefont
 
-#begin fonts/menu.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Compressed
-/build:fonts/menu.spritefont
-
 #begin images/title.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -104,18 +97,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:tiles/11.png
-
-#begin tiles/12.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:tiles/12.png
 
 #begin tiles/2.png
 /importer:TextureImporter
