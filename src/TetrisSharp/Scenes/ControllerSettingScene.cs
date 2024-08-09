@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FontStashSharp;
+using Mfx.Core.Elements;
+using Mfx.Core.Elements.InputConfiguration;
 using Mfx.Core.Scenes;
+using Mfx.Extended.FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using TetrisSharp.Input;
 
 namespace TetrisSharp.Scenes
 {
@@ -17,8 +19,20 @@ namespace TetrisSharp.Scenes
     {
         private readonly FontSystem _fontSystem = new();
         private DynamicSpriteFont? _titleFont;
+        private DynamicSpriteFont? _inputConfigPanelFont;
         private Vector2 _titleFontSize;
-        private readonly Dictionary<GameKeys, string> _keyDict = new();
+        private InputConfigPanel? _inputConfigPanel;
+
+        private readonly Dictionary<string, string> _settings = new Dictionary<string, string>()
+        {
+            { "Up", "" },
+            { "Down", "" },
+            { "Left", "" },
+            { "Right", "" },
+            { "Rotate", "" },
+            { "Drop", "" },
+            { "Pause", "" }
+        };
 
         public ControllerSettingScene(TetrisGame game, string name)
             : base(game, name, Color.FromNonPremultiplied(0, 130, 190, 255))
@@ -30,7 +44,13 @@ namespace TetrisSharp.Scenes
         {
             _fontSystem.AddFont(File.ReadAllBytes(@"res\main.ttf"));
             _titleFont = _fontSystem.GetFont(56);
+            _inputConfigPanelFont = _fontSystem.GetFont(30);
             _titleFontSize = _titleFont.MeasureString("Controller Settings");
+
+            _inputConfigPanel = new InputConfigPanel(this, new FontStashSharpAdapter(_inputConfigPanelFont), _settings,
+                240, 100, 300, Color.White, Color.Brown);
+
+            Add(_inputConfigPanel);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)

@@ -29,26 +29,27 @@
 // SOFTWARE.
 // =============================================================================
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Xna.Framework.Input;
 
-namespace TetrisSharp.Input;
+namespace Mfx.Core.Input;
 
-internal sealed class InputKeys
+public static class VirtualInput
 {
     #region Private Fields
 
-    private readonly List<Keys> _allKeyboardKeys;
-    private readonly List<string> _pressedKeys = new();
-    private readonly List<string> _releasedKeys = new();
+    private static readonly List<Keys> _allKeyboardKeys;
+
+    private static readonly List<string> _pressedKeys = new();
+
+    private static readonly List<string> _releasedKeys = new();
+
+    private static readonly Dictionary<string, bool> _keyHeldState = new();
 
     #endregion Private Fields
 
     #region Public Constructors
 
-    public InputKeys()
+    static VirtualInput()
     {
         _allKeyboardKeys = Enum.GetNames(typeof(Keys)).Select(n => (Keys)Enum.Parse(typeof(Keys), n)).ToList();
     }
@@ -57,7 +58,7 @@ internal sealed class InputKeys
 
     #region Public Methods
 
-    public string[] GetPressedKeys()
+    public static string[] GetPressedVirtualKeys()
     {
         _pressedKeys.Clear();
         var kbd = Keyboard.GetState();
@@ -71,117 +72,117 @@ internal sealed class InputKeys
         {
             if (gpd.ThumbSticks.Left.X < 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.left.left");
+                _pressedKeys.Add("gamepad.1.left");
             }
 
             if (gpd.ThumbSticks.Left.X > 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.left.right");
+                _pressedKeys.Add("gamepad.1.right");
             }
 
             if (gpd.ThumbSticks.Left.Y < 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.left.down");
+                _pressedKeys.Add("gamepad.1.down");
             }
 
             if (gpd.ThumbSticks.Left.Y > 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.left.up");
+                _pressedKeys.Add("gamepad.1.up");
             }
 
             if (gpd.ThumbSticks.Right.X < 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.right.left");
+                _pressedKeys.Add("gamepad.2.left");
             }
 
             if (gpd.ThumbSticks.Right.X > 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.right.right");
+                _pressedKeys.Add("gamepad.2.right");
             }
 
             if (gpd.ThumbSticks.Right.Y < 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.right.down");
+                _pressedKeys.Add("gamepad.2.down");
             }
 
             if (gpd.ThumbSticks.Right.Y > 0)
             {
-                _pressedKeys.Add("gamepad.thumbsticks.right.up");
+                _pressedKeys.Add("gamepad.2.up");
             }
 
             if (gpd.DPad.Left == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.dpad.left");
+                _pressedKeys.Add("gamepad.left");
             }
 
             if (gpd.DPad.Right == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.dpad.right");
+                _pressedKeys.Add("gamepad.right");
             }
 
             if (gpd.DPad.Up == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.dpad.up");
+                _pressedKeys.Add("gamepad.up");
             }
 
             if (gpd.DPad.Down == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.dpad.down");
+                _pressedKeys.Add("gamepad.down");
             }
 
             if (gpd.Buttons.X == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.x");
+                _pressedKeys.Add("gamepad.x");
             }
 
             if (gpd.Buttons.Y == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.y");
+                _pressedKeys.Add("gamepad.y");
             }
 
             if (gpd.Buttons.A == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.a");
+                _pressedKeys.Add("gamepad.a");
             }
 
             if (gpd.Buttons.B == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.b");
+                _pressedKeys.Add("gamepad.b");
             }
 
             if (gpd.Buttons.Back == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.back");
+                _pressedKeys.Add("gamepad.back");
             }
 
             if (gpd.Buttons.BigButton == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.bigbutton");
+                _pressedKeys.Add("gamepad.bigbutton");
             }
 
             if (gpd.Buttons.LeftShoulder == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.left_shoulder");
+                _pressedKeys.Add("gamepad.lshoulder");
             }
 
             if (gpd.Buttons.LeftStick == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.left_stick");
+                _pressedKeys.Add("gamepad.lstick");
             }
 
             if (gpd.Buttons.RightShoulder == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.right_shoulder");
+                _pressedKeys.Add("gamepad.rshoulder");
             }
 
             if (gpd.Buttons.RightStick == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.right_stick");
+                _pressedKeys.Add("gamepad.rstick");
             }
 
             if (gpd.Buttons.Start == ButtonState.Pressed)
             {
-                _pressedKeys.Add("gamepad.buttons.start");
+                _pressedKeys.Add("gamepad.start");
             }
         }
 
@@ -194,22 +195,22 @@ internal sealed class InputKeys
                 {
                     if (joystick.Hats[hatIndex].Left == ButtonState.Pressed)
                     {
-                        _pressedKeys.Add($"joystick.hats[{hatIndex}].left");
+                        _pressedKeys.Add($"joystick.[{hatIndex}].left");
                     }
 
                     if (joystick.Hats[hatIndex].Right == ButtonState.Pressed)
                     {
-                        _pressedKeys.Add($"joystick.hats[{hatIndex}].right");
+                        _pressedKeys.Add($"joystick.[{hatIndex}].right");
                     }
 
                     if (joystick.Hats[hatIndex].Up == ButtonState.Pressed)
                     {
-                        _pressedKeys.Add($"joystick.hats[{hatIndex}].up");
+                        _pressedKeys.Add($"joystick.[{hatIndex}].up");
                     }
 
                     if (joystick.Hats[hatIndex].Down == ButtonState.Pressed)
                     {
-                        _pressedKeys.Add($"joystick.hats[{hatIndex}].down");
+                        _pressedKeys.Add($"joystick.[{hatIndex}].down");
                     }
                 }
 
@@ -217,7 +218,7 @@ internal sealed class InputKeys
                 {
                     if (joystick.Buttons[btnIndex] == ButtonState.Pressed)
                     {
-                        _pressedKeys.Add($"joystick.buttons[{btnIndex}]");
+                        _pressedKeys.Add($"joystick.btn[{btnIndex}]");
                     }
                 }
             }
@@ -230,7 +231,7 @@ internal sealed class InputKeys
         return _pressedKeys.ToArray();
     }
 
-    public string[] GetReleasedKeys()
+    public static string[] GetReleasedVirtualKeys()
     {
         _releasedKeys.Clear();
         var kbd = Keyboard.GetState();
@@ -244,101 +245,101 @@ internal sealed class InputKeys
         {
             if (gpd.ThumbSticks.Left.X == 0)
             {
-                _releasedKeys.Add("gamepad.thumbsticks.left.left");
-                _releasedKeys.Add("gamepad.thumbsticks.left.right");
+                _releasedKeys.Add("gamepad.1.left");
+                _releasedKeys.Add("gamepad.1.right");
             }
 
             if (gpd.ThumbSticks.Left.Y == 0)
             {
-                _releasedKeys.Add("gamepad.thumbsticks.left.up");
-                _releasedKeys.Add("gamepad.thumbsticks.left.down");
+                _releasedKeys.Add("gamepad.1.up");
+                _releasedKeys.Add("gamepad.1.down");
             }
 
             if (gpd.ThumbSticks.Right.X == 0)
             {
-                _releasedKeys.Add("gamepad.thumbsticks.right.left");
-                _releasedKeys.Add("gamepad.thumbsticks.right.right");
+                _releasedKeys.Add("gamepad.2.left");
+                _releasedKeys.Add("gamepad.2.right");
             }
 
             if (gpd.ThumbSticks.Right.Y == 0)
             {
-                _releasedKeys.Add("gamepad.thumbsticks.right.up");
-                _releasedKeys.Add("gamepad.thumbsticks.right.down");
+                _releasedKeys.Add("gamepad.2.up");
+                _releasedKeys.Add("gamepad.2.down");
             }
 
             if (gpd.DPad.Left == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.dpad.left");
+                _releasedKeys.Add("gamepad.left");
             }
 
             if (gpd.DPad.Right == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.dpad.right");
+                _releasedKeys.Add("gamepad.right");
             }
 
             if (gpd.DPad.Up == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.dpad.up");
+                _releasedKeys.Add("gamepad.up");
             }
 
             if (gpd.DPad.Down == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.dpad.down");
+                _releasedKeys.Add("gamepad.down");
             }
 
             if (gpd.Buttons.X == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.x");
+                _releasedKeys.Add("gamepad.x");
             }
 
             if (gpd.Buttons.Y == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.y");
+                _releasedKeys.Add("gamepad.y");
             }
 
             if (gpd.Buttons.A == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.a");
+                _releasedKeys.Add("gamepad.a");
             }
 
             if (gpd.Buttons.B == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.b");
+                _releasedKeys.Add("gamepad.b");
             }
 
             if (gpd.Buttons.Back == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.back");
+                _releasedKeys.Add("gamepad.back");
             }
 
             if (gpd.Buttons.BigButton == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.bigbutton");
+                _releasedKeys.Add("gamepad.bigbutton");
             }
 
             if (gpd.Buttons.LeftShoulder == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.left_shoulder");
+                _releasedKeys.Add("gamepad.lshoulder");
             }
 
             if (gpd.Buttons.LeftStick == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.left_stick");
+                _releasedKeys.Add("gamepad.lstick");
             }
 
             if (gpd.Buttons.RightShoulder == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.right_shoulder");
+                _releasedKeys.Add("gamepad.rshoulder");
             }
 
             if (gpd.Buttons.RightStick == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.right_stick");
+                _releasedKeys.Add("gamepad.rstick");
             }
 
             if (gpd.Buttons.Start == ButtonState.Released)
             {
-                _releasedKeys.Add("gamepad.buttons.start");
+                _releasedKeys.Add("gamepad.start");
             }
         }
 
@@ -351,22 +352,22 @@ internal sealed class InputKeys
                 {
                     if (joystick.Hats[hatIndex].Left == ButtonState.Released)
                     {
-                        _releasedKeys.Add($"joystick.hats[{hatIndex}].left");
+                        _releasedKeys.Add($"joystick.[{hatIndex}].left");
                     }
 
                     if (joystick.Hats[hatIndex].Right == ButtonState.Released)
                     {
-                        _releasedKeys.Add($"joystick.hats[{hatIndex}].right");
+                        _releasedKeys.Add($"joystick.[{hatIndex}].right");
                     }
 
                     if (joystick.Hats[hatIndex].Up == ButtonState.Released)
                     {
-                        _releasedKeys.Add($"joystick.hats[{hatIndex}].up");
+                        _releasedKeys.Add($"joystick.[{hatIndex}].up");
                     }
 
                     if (joystick.Hats[hatIndex].Down == ButtonState.Released)
                     {
-                        _releasedKeys.Add($"joystick.hats[{hatIndex}].down");
+                        _releasedKeys.Add($"joystick.[{hatIndex}].down");
                     }
                 }
 
@@ -374,7 +375,7 @@ internal sealed class InputKeys
                 {
                     if (joystick.Buttons[btnIndex] == ButtonState.Released)
                     {
-                        _releasedKeys.Add($"joystick.buttons[{btnIndex}]");
+                        _releasedKeys.Add($"joystick.btn[{btnIndex}]");
                     }
                 }
             }
@@ -383,14 +384,29 @@ internal sealed class InputKeys
         return _releasedKeys.ToArray();
     }
 
-    public bool IsKeyPressed(string key)
-    {
-        return GetPressedKeys().Contains(key);
-    }
+    public static bool IsVirtualKeyPressed(string virtualKey) => GetPressedVirtualKeys().Contains(virtualKey);
 
-    public bool IsKeyReleased(string key)
+    public static bool IsVirtualKeyReleased(string virtualKey) => GetReleasedVirtualKeys().Contains(virtualKey);
+
+    public static bool HasPressedOnce(string virtualKey)
     {
-        return GetReleasedKeys().Contains(key);
+        if (IsVirtualKeyPressed(virtualKey))
+        {
+            if (_keyHeldState.TryGetValue(virtualKey, out var v1) && v1)
+            {
+                return false;
+            }
+
+            _keyHeldState.TryAdd(virtualKey, true);
+            return true;
+        }
+
+        if (_keyHeldState.TryGetValue(virtualKey, out var v2) && v2)
+        {
+            _keyHeldState.Remove(virtualKey);
+        }
+
+        return false;
     }
 
     #endregion Public Methods
