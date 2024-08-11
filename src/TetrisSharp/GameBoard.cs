@@ -30,7 +30,6 @@
 // =============================================================================
 
 using System;
-using System.Collections.Generic;
 using Mfx.Core.Scenes;
 using Mfx.Core.Sprites;
 using Microsoft.Xna.Framework;
@@ -66,32 +65,6 @@ internal sealed class GameBoard(
     public byte[,] BoardMatrix { get; } = new byte[numOfTilesX, numOfTilesY];
 
     public override int Height { get; } = numOfTilesY;
-
-    /// <summary>
-    ///     Gets the index of the lines that are ready to be removed.
-    /// </summary>
-    public IEnumerable<int> RemovingLines
-    {
-        get
-        {
-            for (var y = 0; y < Constants.NumberOfTilesY; y++)
-            {
-                var numOfFilledTiles = 0;
-                for (var x = 0; x < Constants.NumberOfTilesX; x++)
-                {
-                    if (BoardMatrix[x, y] == 1)
-                    {
-                        numOfFilledTiles++;
-                    }
-                }
-
-                if (numOfFilledTiles == Constants.NumberOfTilesX)
-                {
-                    yield return y;
-                }
-            }
-        }
-    }
 
     public override int Width { get; } = numOfTilesX;
 
@@ -137,6 +110,18 @@ internal sealed class GameBoard(
         return rows;
     }
 
+    public void Deserialize(string b64String)
+    {
+        var bytes = Convert.FromBase64String(b64String);
+        for (var y = 0; y < Height; y++)
+        {
+            for (var x = 0; x < Width; x++)
+            {
+                BoardMatrix[x, y] = bytes[y * Width + x];
+            }
+        }
+    }
+
     /// <summary>
     ///     Merges the block rotation into the game board.
     /// </summary>
@@ -174,6 +159,20 @@ internal sealed class GameBoard(
                 BoardMatrix[x, y] = 0;
             }
         }
+    }
+
+    public string Serialize()
+    {
+        var bytes = new byte[BoardMatrix.Length];
+        for (var y = 0; y < Height; y++)
+        {
+            for (var x = 0; x < Width; x++)
+            {
+                bytes[y * Width + x] = BoardMatrix[x, y];
+            }
+        }
+
+        return Convert.ToBase64String(bytes);
     }
 
     #endregion Public Methods

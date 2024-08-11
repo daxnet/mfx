@@ -32,13 +32,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Xml.Serialization;
 using Microsoft.Xna.Framework;
 
 namespace TetrisSharp.Blocks;
 
 /// <summary>
-/// Represents a rotation definition of a block.
+///     Represents a rotation definition of a block.
 /// </summary>
 public sealed class BlockRotation
 {
@@ -50,7 +49,6 @@ public sealed class BlockRotation
 
     #region Public Properties
 
-    [XmlIgnore]
     public IEnumerable<Point> BottomEdge
     {
         get
@@ -74,11 +72,10 @@ public sealed class BlockRotation
         }
     }
 
-    [XmlIgnore] public int Height { get; private set; }
+    public int Height { get; private set; }
 
-    [XmlIgnore] public byte[,]? Matrix { get; private set; }
+    public byte[,]? Matrix { get; private set; }
 
-    [XmlElement("definition")]
     public string? RotationDefinition
     {
         get => _rotationDefinitions;
@@ -109,7 +106,7 @@ public sealed class BlockRotation
         }
     }
 
-    [XmlIgnore] public int Width { get; private set; }
+    public int Width { get; private set; }
 
     #endregion Public Properties
 

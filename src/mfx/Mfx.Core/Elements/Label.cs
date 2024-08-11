@@ -221,6 +221,11 @@ public class Label : VisibleComponent
                     (Scene.Viewport.Height - _textSize.Y) / 2);
             }
 
+            if (Options.CenterHorizontally)
+            {
+                return new Vector2((Scene.Viewport.Width - _textSize.X) / 2, Y);
+            }
+
             return new Vector2(X, Y);
         }
     }
@@ -271,6 +276,12 @@ public class Label : VisibleComponent
             Color = color;
         }
 
+        public RenderingOptions(Color color, bool centerScreen, bool centerHorizontally)
+            : this(color, centerScreen)
+        {
+            CenterHorizontally = centerHorizontally;
+        }
+
         #endregion Public Constructors
 
         #region Public Properties
@@ -280,6 +291,8 @@ public class Label : VisibleComponent
         ///     should be put at the center of the current <see cref="Viewport" />.
         /// </summary>
         public bool CenterScreen { get; } = false;
+
+        public bool CenterHorizontally { get; } = false;
 
         /// <summary>
         ///     Gets the static label color.

@@ -33,17 +33,17 @@ using Microsoft.Xna.Framework;
 
 namespace Mfx.Core;
 
-public sealed class MfxGameSettings
+public sealed class MfxGameWindowOptions
 {
 
     #region Public Fields
 
-    public static readonly MfxGameSettings FullScreen = new()
+    public static readonly MfxGameWindowOptions FullScreen = new()
     {
         IsFullScreen = true
     };
 
-    public static readonly MfxGameSettings NormalScreenFixedSize = new()
+    public static readonly MfxGameWindowOptions NormalScreenFixedSize = new()
     {
         AllowResizing = false,
         Width = DefaultWidth,
@@ -52,7 +52,7 @@ public sealed class MfxGameSettings
         MouseVisible = false
     };
 
-    public static readonly MfxGameSettings NormalScreenFixedSizeShowMouse = new()
+    public static readonly MfxGameWindowOptions NormalScreenFixedSizeShowMouse = new()
     {
         AllowResizing = false,
         Width = DefaultWidth,
@@ -61,7 +61,7 @@ public sealed class MfxGameSettings
         MouseVisible = true
     };
 
-    public static readonly MfxGameSettings NormalScreenShowMouse = new()
+    public static readonly MfxGameWindowOptions NormalScreenShowMouse = new()
     {
         AllowResizing = true,
         Width = DefaultWidth,
@@ -70,7 +70,7 @@ public sealed class MfxGameSettings
         MouseVisible = true
     };
 
-    public static readonly MfxGameSettings FullScreenShowMouse = new()
+    public static readonly MfxGameWindowOptions FullScreenShowMouse = new()
     {
         IsFullScreen = true,
         MouseVisible = true
@@ -100,7 +100,7 @@ public sealed class MfxGameSettings
 
     #region Public Methods
 
-    public static MfxGameSettings FromDefault(string title, MfxGameSettings? settings = null, Point? size = null)
+    public static MfxGameWindowOptions FromDefault(string title, MfxGameWindowOptions? settings = null, Point? size = null)
     {
         var result = settings ?? NormalScreenShowMouse;
         result.Title = title;

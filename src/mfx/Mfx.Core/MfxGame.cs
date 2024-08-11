@@ -48,7 +48,7 @@ public class MfxGame : Game
 
     private readonly GraphicsDeviceManager _graphicsDeviceManager;
     private readonly Dictionary<string, IScene> _scenes = new();
-    private readonly MfxGameSettings _settings;
+    private readonly MfxGameWindowOptions _settings;
     private IScene? _activeScene;
     private bool _disposed;
 
@@ -57,11 +57,11 @@ public class MfxGame : Game
     #region Public Constructors
 
     public MfxGame()
-        : this(MfxGameSettings.NormalScreenShowMouse)
+        : this(MfxGameWindowOptions.NormalScreenShowMouse)
     {
     }
 
-    public MfxGame(MfxGameSettings settings)
+    public MfxGame(MfxGameWindowOptions settings)
     {
         _graphicsDeviceManager = new GraphicsDeviceManager(this);
         _settings = settings;
@@ -141,6 +141,9 @@ public class MfxGame : Game
     {
         if (!_disposed)
         {
+            // Triggers a leave operation on the current active scene.
+            _activeScene?.Leave(true);
+
             if (disposing)
             {
                 Parallel.ForEach(_scenes, s => s.Value.Dispose());

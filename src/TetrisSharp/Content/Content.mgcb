@@ -34,7 +34,7 @@
 
 #begin sounds/bgm.mp3
 /importer:Mp3Importer
-/processor:SoundEffectProcessor
+/processor:SongProcessor
 /processorParam:Quality=Best
 /build:sounds/bgm.mp3
 
@@ -52,7 +52,7 @@
 
 #begin sounds/opening.mp3
 /importer:Mp3Importer
-/processor:SoundEffectProcessor
+/processor:SongProcessor
 /processorParam:Quality=Best
 /build:sounds/opening.mp3
 

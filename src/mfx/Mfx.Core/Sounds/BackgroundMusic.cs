@@ -30,49 +30,47 @@
 // =============================================================================
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Media;
 
 namespace Mfx.Core.Sounds;
 
-public sealed class BackgroundMusic(IEnumerable<SoundEffect> musicEffects, float volume = 1.0f, bool looped = true)
-    : Component
+public sealed class BackgroundMusic : Component
 {
     #region Private Fields
 
-    private readonly SoundEffect[] _musicEffects = musicEffects.ToArray();
+    private readonly bool _looped;
+
+    private readonly Song[] _songs;
+
     private readonly TimeSpan _soundStatusCheckInterval = TimeSpan.FromSeconds(5);
+
     private int _currentIndex;
+
     private TimeSpan _elapsedGameTime;
-    private SoundEffectInstance? _musicEffectInstance;
+
     private bool _stopped = true;
 
     #endregion Private Fields
 
+    #region Public Constructors
+
+    public BackgroundMusic(IEnumerable<Song> songs, float volume = 1.0f, bool looped = true)
+    {
+        _songs = songs.ToArray();
+        Volume = volume;
+        _looped = looped;
+    }
+
+    #endregion Public Constructors
+
     #region Public Properties
 
-    public SoundState State
-    {
-        get
-        {
-            if (_musicEffectInstance is { IsDisposed: false })
-            {
-                return _musicEffectInstance.State;
-            }
-
-            return SoundState.Stopped;
-        }
-    }
+    public MediaState State => MediaPlayer.State;
 
     public float Volume
     {
-        get => _musicEffectInstance?.Volume ?? 0;
-        set
-        {
-            if (_musicEffectInstance is { IsDisposed: false })
-            {
-                _musicEffectInstance.Volume = value;
-            }
-        }
+        get => MediaPlayer.Volume;
+        set => MediaPlayer.Volume = value;
     }
 
     #endregion Public Properties
@@ -81,10 +79,7 @@ public sealed class BackgroundMusic(IEnumerable<SoundEffect> musicEffects, float
 
     public void Pause()
     {
-        if (_musicEffectInstance is { IsDisposed: false })
-        {
-            _musicEffectInstance.Pause();
-        }
+        MediaPlayer.Pause();
     }
 
     public void Play()
@@ -99,10 +94,7 @@ public sealed class BackgroundMusic(IEnumerable<SoundEffect> musicEffects, float
 
     public void Resume()
     {
-        if (_musicEffectInstance is { IsDisposed: false })
-        {
-            _musicEffectInstance.Resume();
-        }
+        MediaPlayer.Resume();
     }
 
     public void Stop()
@@ -118,12 +110,12 @@ public sealed class BackgroundMusic(IEnumerable<SoundEffect> musicEffects, float
         }
 
         _elapsedGameTime += gameTime.ElapsedGameTime;
-        if (_elapsedGameTime >= _soundStatusCheckInterval && _musicEffectInstance is { IsDisposed: false })
+        if (_elapsedGameTime >= _soundStatusCheckInterval)
         {
-            if (_musicEffectInstance.State == SoundState.Stopped)
+            if (MediaPlayer.State == MediaState.Stopped)
             {
-                _currentIndex = (_currentIndex + 1) % _musicEffects.Length;
-                if (_currentIndex == 0 && !looped)
+                _currentIndex = (_currentIndex + 1) % _songs.Length;
+                if (_currentIndex == 0 && !_looped)
                 {
                     Stop();
                     return;
@@ -143,20 +135,13 @@ public sealed class BackgroundMusic(IEnumerable<SoundEffect> musicEffects, float
     private void Play(int index)
     {
         Stop(false);
-        _musicEffectInstance = _musicEffects[index].CreateInstance();
-        _musicEffectInstance.IsLooped = false;
-        _musicEffectInstance.Volume = volume;
-        _musicEffectInstance.Play();
+        var song = _songs[index];
+        MediaPlayer.Play(song);
     }
 
     private void Stop(bool stopAll)
     {
-        if (_musicEffectInstance is { IsDisposed: false })
-        {
-            _musicEffectInstance.Stop(true);
-            _musicEffectInstance.Dispose();
-        }
-
+        MediaPlayer.Stop();
         if (stopAll && !_stopped)
         {
             _stopped = true;
