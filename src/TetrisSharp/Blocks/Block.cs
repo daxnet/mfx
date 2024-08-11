@@ -94,7 +94,7 @@ internal sealed class Block : Sprite
         _boardY = boardY;
         _isActiveBlock = isActiveBlock;
 
-        if (x is null && y is null && blockDefinition.Rotations is not null)
+        if (x is null && y is null)
         {
             _x = (Constants.NumberOfTilesX - blockDefinition.Rotations[0].Width) / 2;
             _y = 0;
@@ -111,6 +111,8 @@ internal sealed class Block : Sprite
                 _y = y.Value;
             }
         }
+
+        Layer = int.MaxValue - 1;
     }
 
     #endregion Public Constructors
@@ -121,7 +123,7 @@ internal sealed class Block : Sprite
     ///     Gets the current rotation of the block. If no rotations have been defined
     ///     in the block definition, <see cref="TetrisSharpException" /> will be thrown.
     /// </summary>
-    public BlockRotation CurrentRotation => _blockDefinition.Rotations?[_currentRotationIndex] ??
+    public BlockRotation CurrentRotation => _blockDefinition.Rotations[_currentRotationIndex] ??
                                             throw new TetrisSharpException(
                                                 "A block definition should have at least one rotation definition.");
 
@@ -198,11 +200,6 @@ internal sealed class Block : Sprite
     {
         get
         {
-            if (_blockDefinition.Rotations is null)
-            {
-                return false;
-            }
-
             var nextRotation =
                 _blockDefinition.Rotations[(_currentRotationIndex + 1) % _blockDefinition.Rotations.Count];
             var rotatedX = _x;
@@ -308,7 +305,7 @@ internal sealed class Block : Sprite
             return;
         }
 
-        if (!CanRotate || _blockDefinition.Rotations is null)
+        if (!CanRotate)
         {
             return;
         }

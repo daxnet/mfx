@@ -33,10 +33,16 @@ using Mfx.Core.Scenes;
 
 namespace TetrisSharp.Scenes;
 
+/// <summary>
+///     Represents that the implemented classes are Tetris Game scenes.
+/// </summary>
 internal interface IGameScene : IScene
 {
     #region Public Properties
 
+    /// <summary>
+    ///     Gets an instance of the <see cref="GameBoard" /> class.
+    /// </summary>
     GameBoard? GameBoard { get; }
 
     #endregion Public Properties

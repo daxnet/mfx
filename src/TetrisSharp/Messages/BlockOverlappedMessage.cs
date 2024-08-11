@@ -35,17 +35,23 @@ using TetrisSharp.Blocks;
 namespace TetrisSharp.Messages;
 
 /// <summary>
-/// Represents the message which notifies that the block has been overlapped.
+///     Represents the message which notifies that the block has been overlapped.
 /// </summary>
 /// <param name="block">The block that triggered the message.</param>
-/// <param name="checkmate">A <see cref="bool"/> value which indicates if the game is a checkmate.</param>
+/// <param name="checkmate">A <see cref="bool" /> value which indicates if the game is a checkmate.</param>
 internal sealed class BlockOverlappedMessage(Block block, bool checkmate) : Message
 {
     #region Public Properties
 
-    public bool Checkmate { get; } = checkmate;
-
+    /// <summary>
+    ///     Gets the instance of the <see cref="Block" /> that triggered the message.
+    /// </summary>
     public Block Block { get; } = block;
+
+    /// <summary>
+    ///     Gets a <see cref="bool" /> value which indicates if the game is a checkmate.
+    /// </summary>
+    public bool Checkmate { get; } = checkmate;
 
     #endregion Public Properties
 }

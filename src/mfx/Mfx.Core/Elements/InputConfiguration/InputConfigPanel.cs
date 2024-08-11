@@ -46,7 +46,7 @@ public class InputConfigPanel : VisibleComponent
     private readonly Color _currentItemColor;
     private readonly IFontAdapter _fontAdapter;
     private readonly float _itemHeight;
-    private readonly Dictionary<string, string> _keyMappings;
+    private readonly Dictionary<string, string> _keyMappings = [];
     private readonly float _width;
     private int _currentIndex;
     private TimeSpan _ticks;
@@ -56,17 +56,21 @@ public class InputConfigPanel : VisibleComponent
     #region Public Constructors
 
     public InputConfigPanel(IScene scene, IFontAdapter fontAdapter,
-        IEnumerable<KeyValuePair<string, string>> keyMappings, float x,
+        IEnumerable<string> keyNames, float x,
         float y, float width)
-        : this(scene, fontAdapter, keyMappings, x, y, width, Color.White, Color.Red)
+        : this(scene, fontAdapter, keyNames, x, y, width, Color.White, Color.Red)
     {
     }
 
     public InputConfigPanel(IScene scene, IFontAdapter fontAdapter,
-        IEnumerable<KeyValuePair<string, string>> keyMappings, float x,
+        IEnumerable<string> keyNames, float x,
         float y, float width, Color color, Color currentItemColor) : base(scene, null, x, y)
     {
-        _keyMappings = keyMappings.ToDictionary();
+        foreach (var keyName in keyNames)
+        {
+            _keyMappings.Add(keyName, string.Empty);
+        }
+
         _width = width;
         _fontAdapter = fontAdapter;
         _color = color;
@@ -79,7 +83,17 @@ public class InputConfigPanel : VisibleComponent
 
     #region Public Properties
 
-    public IEnumerable<KeyValuePair<string, string>> KeyMappings => _keyMappings;
+    public IEnumerable<KeyValuePair<string, string>> KeyMappings
+    {
+        get => _keyMappings;
+        set
+        {
+            foreach (var kvp in value)
+            {
+                _keyMappings[kvp.Key] = kvp.Value;
+            }
+        }
+    }
 
     #endregion Public Properties
 
@@ -88,10 +102,6 @@ public class InputConfigPanel : VisibleComponent
     public void Reset()
     {
         _currentIndex = 0;
-        foreach (var kvp in _keyMappings)
-        {
-            _keyMappings[kvp.Key] = "(none)";
-        }
     }
 
     public override void Update(GameTime gameTime)

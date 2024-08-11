@@ -70,13 +70,8 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
         ], 100, 200, Color.White, Color.Red, Color.Gray);
 
         _selectedMenuTextLabel = new Label("", this, _labelFont, 0, 25, Color.Yellow);
-        _inputConfigPnl = new InputConfigPanel(this, new SpriteFontAdapter(_menuFont), new Dictionary<string, string>
-        {
-            { "Up", "" },
-            { "Down", "" },
-            { "Left", "" },
-            { "Right", "" },
-        }, 500, 200, 270, Color.YellowGreen, Color.Brown);
+        _inputConfigPnl = new InputConfigPanel(this, new SpriteFontAdapter(_menuFont),
+            ["Up", "Down", "Left", "Right"], 500, 200, 270, Color.YellowGreen, Color.Brown);
 
         Add(new Label("This is a static label.", this, _labelFont, 0, 0, Color.Yellow));
         Add(_selectedMenuTextLabel);

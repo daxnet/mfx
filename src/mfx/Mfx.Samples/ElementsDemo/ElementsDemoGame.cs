@@ -10,7 +10,7 @@ namespace Mfx.Samples.ElementsDemo
     internal class ElementsDemoGame : MfxGame
     {
         public ElementsDemoGame()
-            : base(MfxGameSettings.FromDefault("Elements Demonstration"))
+            : base(MfxGameWindowOptions.FromDefault("Elements Demonstration"))
         {
             AddScene<ElementsDemoScene>();
             AddScene<NewGameScene>();

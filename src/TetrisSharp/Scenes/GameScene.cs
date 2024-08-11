@@ -33,72 +33,64 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FontStashSharp;
-using Mfx.Core;
 using Mfx.Core.Elements;
 using Mfx.Core.Input;
 using Mfx.Core.Scenes;
 using Mfx.Core.Sounds;
-using Mfx.Core.Sprites;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using TetrisSharp.Blocks;
 using TetrisSharp.Messages;
 
 namespace TetrisSharp.Scenes;
 
-internal sealed class GameScene : Scene, IGameScene
+internal sealed class GameScene(TetrisGame game, string name)
+    : Scene(game, name, Color.FromNonPremultiplied(0, 130, 190, 255)), IGameScene
 {
 
     #region Private Fields
 
-    private const string CopyrightText = "Copyright (C) 2022-2024 by daxnet";
-    private const float KeyDelay = 0.09f;
+    private const float KeyDelay = 0.1f;
     private static readonly Random _rnd = new(DateTime.Now.Millisecond);
 
     private readonly BlockGenerator _blockGenerator = new("blocks.txt");
     private readonly FontSystem _mainFontSystem = new();
     private readonly Queue<int> _tetrisQueue = new();
     private readonly Texture2D[] _tileTextures = new Texture2D[Constants.TileTextureCount];
+    private BackgroundMusic? _bgm;
+    private Song? _bgmSong;
     private Block? _block;
     private int _blocks;
     private int _boardX;
     private int _boardY;
+    private Label? _copyrightLabel;
     private bool _disposed;
     private Texture2D? _fixedTileTexture;
     private Texture2D? _gameboardTexture;
-    private int _level;
-    private int _lines;
-    private Block? _nextBlock;
-    private int _score;
-    private Rectangle _scoreBoardBoundingBox;
-    private float _timeSinceLastKeyPress;
-    private DynamicSpriteFont? _scoreBoardFont;
-    private DynamicSpriteFont? _gameOverFont;
-    private SpriteFont? _arialFont;
     private bool _gameOver;
-    private Label? _copyrightLabel;
+    private DynamicSpriteFont? _gameOverFont;
     private Sound? _gameOverSound;
     private SoundEffect? _gameOverSoundEffect;
+    private bool _gamePaused;
+    private int _level;
+    private int _lines;
     private Sound? _mergeSound;
     private SoundEffect? _mergeSoundEffect;
+    private Block? _nextBlock;
+    private DynamicSpriteFont? _pauseTextFont;
     private Sound? _removeRowSound;
     private SoundEffect? _removeRowSoundEffect;
-    private SoundEffect? _bgmEffect;
-    private BackgroundMusic? _bgm;
+    private int _score;
+    private Rectangle _scoreBoardBoundingBox;
+    private DynamicSpriteFont? _scoreBoardFont;
+    private TetrisGameSettings? _settings;
+    private float _timeSinceLastKeyPress;
 
     #endregion Private Fields
-
-    #region Public Constructors
-
-    public GameScene(TetrisGame game, string name)
-        : base(game, name, Color.FromNonPremultiplied(0, 130, 190, 255))
-    {
-    }
-
-    #endregion Public Constructors
 
     #region Public Properties
 
@@ -111,17 +103,26 @@ internal sealed class GameScene : Scene, IGameScene
     public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
         DrawScoreBoard(spriteBatch);
+
         base.Draw(gameTime, spriteBatch);
 
         if (_gameOver)
         {
-            spriteBatch.DrawString(_gameOverFont, "GAME OVER", new Vector2(_boardX + 12, _boardY + 150), Color.OrangeRed);
+            spriteBatch.DrawString(_gameOverFont, Constants.GameOverText, new Vector2(_boardX + 12, _boardY + 150),
+                Color.OrangeRed);
+        }
+
+        if (_gamePaused)
+        {
+            spriteBatch.DrawString(_pauseTextFont, Constants.PauseText, new Vector2(_boardX + 75, _boardY + 150),
+                Color.RosyBrown);
         }
     }
 
     public override void Enter(object? args = null)
     {
         GameAs<TetrisGame>().CanContinue = true;
+        _settings = GameAs<TetrisGame>().Settings;
 
         if (args is not string sArgs)
         {
@@ -131,16 +132,29 @@ internal sealed class GameScene : Scene, IGameScene
         switch (sArgs)
         {
             case Constants.NewGameFlag:
-                ResetGame();
+                InitializeGame();
+                _bgm?.Play();
+                break;
+
+            case Constants.ContinueGameFlag:
+                if (!_gamePaused)
+                {
+                    _bgm?.Resume();
+                }
+                break;
+
+            case Constants.LoadGameFlag:
+                InitializeGame(_settings);
+                _bgm?.Play();
                 break;
         }
-
-        _bgm?.Play();
     }
 
-    public override void Leave()
+    public override void Leave(bool closing = false)
     {
-        _bgm?.Stop();
+        _bgm?.Pause();
+        SaveSettings();
+        GameAs<TetrisGame>().CanContinue = !_gameOver;
     }
 
     public override void Load(ContentManager contentManager)
@@ -148,29 +162,30 @@ internal sealed class GameScene : Scene, IGameScene
         // Board and coordinates
         _boardX = 30;
         _boardY = (Viewport.Height - 25 * Constants.NumberOfTilesY) / 2;
-
         _scoreBoardBoundingBox = new Rectangle(_boardX + Constants.NumberOfTilesX * 25 + 30, _boardY,
             Viewport.Width - Constants.NumberOfTilesX * 25 - 30 - 2 * _boardX, Viewport.Height - 2 * _boardY);
 
         // Sound & music
         _gameOverSoundEffect = contentManager.Load<SoundEffect>(@"sounds\gameover");
-        _gameOverSound = new(_gameOverSoundEffect, Constants.SoundVolume);
+        _gameOverSound = new Sound(_gameOverSoundEffect, Constants.SoundVolume);
         _mergeSoundEffect = contentManager.Load<SoundEffect>(@"sounds\merge");
-        _mergeSound = new(_mergeSoundEffect, Constants.SoundVolume);
+        _mergeSound = new Sound(_mergeSoundEffect, Constants.SoundVolume);
         _removeRowSoundEffect = contentManager.Load<SoundEffect>(@"sounds\remove_row");
-        _removeRowSound = new(_removeRowSoundEffect, Constants.SoundVolume);
-        _bgmEffect = contentManager.Load<SoundEffect>(@"sounds\bgm");
-        _bgm = new([_bgmEffect], .2f);
+        _removeRowSound = new Sound(_removeRowSoundEffect, Constants.SoundVolume);
+        _bgmSong = contentManager.Load<Song>(@"sounds\bgm");
+        _bgm = new BackgroundMusic([_bgmSong], Constants.BgmVolume);
 
         // Fonts & static texts
         _mainFontSystem.AddFont(File.ReadAllBytes(@"res\main.ttf"));
         _scoreBoardFont = _mainFontSystem.GetFont(38);
         _gameOverFont = _mainFontSystem.GetFont(70);
-        _arialFont = contentManager.Load<SpriteFont>(@"fonts\arial");
-        var copyrightTextSize = _arialFont.MeasureString(CopyrightText);
+        _pauseTextFont = _mainFontSystem.GetFont(70);
+        var arialFont = contentManager.Load<SpriteFont>(@"fonts\arial");
+        var copyrightTextSize = arialFont.MeasureString(Constants.CopyrightText);
         var copyrightTextX = _scoreBoardBoundingBox.X + _scoreBoardBoundingBox.Width - copyrightTextSize.X;
         var copyrightTextY = _scoreBoardBoundingBox.Bottom - copyrightTextSize.Y;
-        _copyrightLabel = new Label(CopyrightText, this, _arialFont, copyrightTextX, copyrightTextY, Color.White);
+        _copyrightLabel = new Label(Constants.CopyrightText, this, arialFont, copyrightTextX, copyrightTextY,
+            Color.White);
 
         // Load block tile textures
         for (var i = 1; i <= Constants.TileTextureCount; i++)
@@ -204,6 +219,20 @@ internal sealed class GameScene : Scene, IGameScene
             Game.Transit<TitleScene>();
         }
 
+        if (_settings?.KeySettings is not null &&
+            VirtualInput.HasPressedOnce(_settings.KeySettings[Constants.VkPause]) &&
+            !_gameOver)
+        {
+            _gamePaused = !_gamePaused;
+            ToggleBackgroundMusic(!_gamePaused);
+        }
+
+        // If the game is paused, return.
+        if (_gamePaused)
+        {
+            return;
+        }
+
         // If game has ended, suppress the response
         // to all key board or joystick events and simply return.
         if (_gameOver)
@@ -213,29 +242,28 @@ internal sealed class GameScene : Scene, IGameScene
 
         var seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
         _timeSinceLastKeyPress += seconds;
-        if (_timeSinceLastKeyPress > KeyDelay)
+        if (_timeSinceLastKeyPress > KeyDelay && _settings?.KeySettings is not null)
         {
-            if (keyState.IsKeyDown(Keys.A))
+            if (VirtualInput.IsVirtualKeyPressed(_settings.KeySettings[Constants.VkLeft]))
             {
                 _block?.MoveLeft();
             }
-            else if (keyState.IsKeyDown(Keys.D))
+            if (VirtualInput.IsVirtualKeyPressed(_settings.KeySettings[Constants.VkRight]))
             {
                 _block?.MoveRight();
             }
-            else if (keyState.IsKeyDown(Keys.S))
+            if (VirtualInput.IsVirtualKeyPressed(_settings.KeySettings[Constants.VkDown]))
             {
                 _block?.MoveDown();
             }
-            else if (keyState.HasPressedOnce(Keys.J))
+            if (VirtualInput.HasPressedOnce(_settings.KeySettings[Constants.VkRotate]))
             {
                 _block?.Rotate();
             }
-            else if (keyState.HasPressedOnce(Keys.K))
+            if (VirtualInput.HasPressedOnce(_settings.KeySettings[Constants.VkDrop]))
             {
                 _block?.Drop();
             }
-            
 
             _timeSinceLastKeyPress = 0;
         }
@@ -267,7 +295,8 @@ internal sealed class GameScene : Scene, IGameScene
                 _removeRowSound?.Stop();
                 _removeRowSoundEffect?.Dispose();
                 _bgm?.Stop();
-                _bgmEffect?.Dispose();
+                _bgmSong?.Dispose();
+                _mainFontSystem.Dispose();
             }
 
             base.Dispose(disposing);
@@ -327,9 +356,15 @@ internal sealed class GameScene : Scene, IGameScene
             _lines += rows ?? 0;
 
             // Recalculate level
-            if (_score > _level * 2000)
+            if (_score > _level * Constants.ScoreForLevelUp)
             {
                 _level++;
+            }
+
+            // Setting high score
+            if (_settings is not null)
+            {
+                _settings.HighestScore = _settings.HighestScore > _score ? _settings.HighestScore : _score;
             }
 
             // Remove the current block sprite from the scene.
@@ -362,31 +397,67 @@ internal sealed class GameScene : Scene, IGameScene
             new Vector2(_scoreBoardBoundingBox.X, _boardY + 30), Color.YellowGreen * 0.9f);
 
         // Level
-        spriteBatch.DrawString(_scoreBoardFont, "Level", new Vector2(_scoreBoardBoundingBox.X, _boardY + 90), Color.White);
+        spriteBatch.DrawString(_scoreBoardFont, "Level", new Vector2(_scoreBoardBoundingBox.X, _boardY + 90),
+            Color.White);
         spriteBatch.DrawString(_scoreBoardFont, _level.ToString().PadLeft(2, '0'),
             new Vector2(_scoreBoardBoundingBox.X, _boardY + 120), Color.YellowGreen * 0.9f);
 
         // Blocks
-        spriteBatch.DrawString(_scoreBoardFont, "Blocks", new Vector2(_scoreBoardBoundingBox.X, _boardY + 180), Color.White);
+        spriteBatch.DrawString(_scoreBoardFont, "Blocks", new Vector2(_scoreBoardBoundingBox.X, _boardY + 180),
+            Color.White);
         spriteBatch.DrawString(_scoreBoardFont, _blocks.ToString().PadLeft(5, '0'),
             new Vector2(_scoreBoardBoundingBox.X, _boardY + 210), Color.YellowGreen * 0.9f);
 
         // Lines
-        spriteBatch.DrawString(_scoreBoardFont, "Lines", new Vector2(_scoreBoardBoundingBox.X, _boardY + 270), Color.White);
+        spriteBatch.DrawString(_scoreBoardFont, "Lines", new Vector2(_scoreBoardBoundingBox.X, _boardY + 270),
+            Color.White);
         spriteBatch.DrawString(_scoreBoardFont, _lines.ToString().PadLeft(5, '0'),
             new Vector2(_scoreBoardBoundingBox.X, _boardY + 300), Color.YellowGreen * 0.9f);
 
-        spriteBatch.DrawString(_scoreBoardFont, "Next", new Vector2(_scoreBoardBoundingBox.X, _boardY + 360), Color.White);
-    }
-    private void ResetGame()
-    {
-        _score = 0;
-        _level = 1;
-        _lines = 0;
-        _blocks = 0;
-        _gameOver = false;
+        // Next
+        spriteBatch.DrawString(_scoreBoardFont, "Next", new Vector2(_scoreBoardBoundingBox.X, _boardY + 360),
+            Color.White);
 
-        GameBoard?.Reset();
+        // High Score
+        spriteBatch.DrawString(_scoreBoardFont, "Hi-Score", new Vector2(_scoreBoardBoundingBox.X, _boardY + 480),
+            Color.White);
+        spriteBatch.DrawString(_scoreBoardFont, _settings?.HighestScore.ToString().PadLeft(9, '0'),
+            new Vector2(_scoreBoardBoundingBox.X, _boardY + 510), Color.YellowGreen * 0.9f);
+    }
+
+    private void InitializeGame(TetrisGameSettings? settings = null)
+    {
+        if (settings is null)
+        {
+            _score = 0;
+            _level = 1;
+            _lines = 0;
+            _blocks = 0;
+            GameBoard?.Reset();
+        }
+        else
+        {
+            _score = settings.LastScore;
+            _level = settings.LastLevel;
+            _lines = settings.LastLines;
+
+            // Minus 1 because later there will be another
+            // block being added to the board, which will
+            // add this 1 back.
+            _blocks = settings.LastBlocks - 1;
+
+            if (!string.IsNullOrEmpty(settings.LastGameBoardValuesBase64))
+            {
+                GameBoard?.Deserialize(settings.LastGameBoardValuesBase64);
+            }
+            else
+            {
+                GameBoard?.Reset();
+            }
+        }
+
+        _gameOver = false;
+        _gamePaused = false;
         if (_block is not null)
         {
             Remove(_block);
@@ -398,6 +469,35 @@ internal sealed class GameScene : Scene, IGameScene
         }
 
         AddBlockToBoard();
+    }
+
+    private void SaveSettings()
+    {
+        if (_settings is not null)
+        {
+            _settings.LastBlocks = _blocks;
+            _settings.LastGameBoardValuesBase64 = GameBoard?.Serialize();
+            _settings.LastLevel = _level;
+            _settings.LastLines = _lines;
+            _settings.LastScore = _score;
+            TetrisGameSettings.SaveSettings(TetrisGameSettings.DefaultSettingsFileName, _settings);
+        }
+    }
+    private void ToggleBackgroundMusic(bool play)
+    {
+        if (play && _bgm?.State == MediaState.Playing)
+        {
+            return;
+        }
+
+        if (play && _bgm?.State != MediaState.Playing)
+        {
+            _bgm?.Resume();
+        }
+        else if (_bgm?.State != MediaState.Paused)
+        {
+            _bgm?.Pause();
+        }
     }
 
     #endregion Private Methods
