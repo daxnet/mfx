@@ -29,26 +29,42 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
+using Mfx.Core.Fonts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Sprites;
+namespace Mfx.Core.Elements.Menus;
 
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+/// <summary>
+///     Represents the based class of menu item effects.
+/// </summary>
+public abstract class MenuItemEffect
 {
-    #region Protected Methods
+    #region Public Methods
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
-    }
+    /// <summary>
+    ///     Draws the menu item with the given parameters.
+    /// </summary>
+    /// <param name="hovering">
+    ///     Indicates if the mouse cursor is currectly hovering over the menu item.
+    /// </param>
+    /// <param name="spriteBatch">
+    ///     The <see cref="SpriteBatch" /> instance which is responsible for drawing the menu item.
+    /// </param>
+    /// <param name="menuItemFontAdapter">
+    ///     The <see cref="IFontAdapter" /> that delegates the rendering of the menu item font to an underlying font object.
+    /// </param>
+    /// <param name="menuItem">The <see cref="MenuItem" /> to be drawn.</param>
+    /// <param name="menuItemRect">
+    ///     The <see cref="Rectangle" /> which represents the rectangle area where the menu item
+    ///     could be drawn.
+    /// </param>
+    /// <param name="menuRect">
+    ///     The <see cref="Rectangle" /> which represents the rectangle area of the entire menu.
+    /// </param>
+    public abstract void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, IFontAdapter menuItemFontAdapter,
+        MenuItem menuItem,
+        Rectangle menuItemRect, Rectangle menuRect);
 
-    #endregion Protected Methods
+    #endregion Public Methods
 }

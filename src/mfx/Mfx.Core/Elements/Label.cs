@@ -29,6 +29,7 @@
 // SOFTWARE.
 // =============================================================================
 
+using Mfx.Core.Fonts;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -42,7 +43,7 @@ public class Label : VisibleComponent
 {
     #region Private Fields
 
-    private readonly SpriteFont _font;
+    private readonly IFontAdapter _fontAdapter;
     private readonly Vector2 _textSize;
 
     #endregion Private Fields
@@ -50,7 +51,7 @@ public class Label : VisibleComponent
     #region Public Constructors
 
     /// <summary>
-    ///     Initializes a new instance of the <c>StaticLabel</c> class.
+    ///     Initializes a new instance of the <c>Label</c> class.
     /// </summary>
     /// <param name="text">The text to be shown on the specified scene.</param>
     /// <param name="scene">The scene on which the text should be shown.</param>
@@ -64,7 +65,23 @@ public class Label : VisibleComponent
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <c>StaticLabel</c> class.
+    ///     Initializes a new instance of the <c>Label</c> class.
+    /// </summary>
+    /// <param name="text">The text to be shown on the specified scene.</param>
+    /// <param name="scene">The scene on which the text should be shown.</param>
+    /// <param name="font">The <see cref="SpriteFont" /> instance which specifies the font of the text.</param>
+    /// <param name="options">The <see cref="RenderingOptions" /> that specifies the options for rendering the static label.</param>
+    public Label(string text, IScene scene, SpriteFont font, RenderingOptions options) : base(scene, font.Texture)
+    {
+        _fontAdapter = new SpriteFontAdapter(font);
+        Text = text;
+        Collidable = false;
+        Options = options;
+        _textSize = font.MeasureString(text);
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <c>Label</c> class.
     /// </summary>
     /// <param name="text">The text to be shown on the specified scene.</param>
     /// <param name="scene">The scene on which the text should be shown.</param>
@@ -81,7 +98,7 @@ public class Label : VisibleComponent
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <c>StaticLabel</c> class.
+    ///     Initializes a new instance of the <c>Label</c> class.
     /// </summary>
     /// <param name="text">The text to be shown on the specified scene.</param>
     /// <param name="scene">The scene on which the text should be shown.</param>
@@ -92,11 +109,77 @@ public class Label : VisibleComponent
     public Label(string text, IScene scene, SpriteFont font, RenderingOptions options, float x, float y)
         : base(scene, font.Texture, x, y)
     {
-        _font = font;
+        _fontAdapter = new SpriteFontAdapter(font);
         Text = text;
         Collidable = false;
         Options = options;
         _textSize = font.MeasureString(text);
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <c>Label</c> class.
+    /// </summary>
+    /// <param name="text">The text to be shown on the specified scene.</param>
+    /// <param name="scene">The scene on which the text should be shown.</param>
+    /// <param name="fontAdapter">The <see cref="SpriteFont" /> instance.</param>
+    /// <param name="x">The X coordinate of the text position.</param>
+    /// <param name="y">The Y coordinate of the text position.</param>
+    /// <param name="color">The <see cref="Color" /> to be used to show the text.</param>
+    public Label(string text, IScene scene, IFontAdapter fontAdapter, float x, float y, Color color)
+        : this(text, scene, fontAdapter, new RenderingOptions(color, false), x, y)
+    {
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <c>Label</c> class.
+    /// </summary>
+    /// <param name="text">The text to be shown on the specified scene.</param>
+    /// <param name="scene">The scene on which the text should be shown.</param>
+    /// <param name="fontAdapter">The <see cref="IFontAdapter" /> instance.</param>
+    /// <param name="options">The <see cref="RenderingOptions" /> that specifies the options for rendering the static label.</param>
+    public Label(string text, IScene scene, IFontAdapter fontAdapter, RenderingOptions options) : base(scene, null)
+    {
+        _fontAdapter = fontAdapter;
+        Text = text;
+        Collidable = false;
+        Options = options;
+        _textSize = _fontAdapter.MeasureString(text);
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <c>Label</c> class.
+    /// </summary>
+    /// <param name="text">The text to be shown on the specified scene.</param>
+    /// <param name="scene">The scene on which the text should be shown.</param>
+    /// <param name="fontAdapter">The <see cref="IFontAdapter" /> instance.</param>
+    /// <param name="color">The <see cref="Color" /> to be used to show the text.</param>
+    /// <remarks>
+    ///     As this constructor doesn't accept X and Y coordinates parameters, the static label will be
+    ///     placed at the center of the current <see cref="Viewport" />. Therefore, X and Y properties will always be
+    ///     zero (0).
+    /// </remarks>
+    public Label(string text, IScene scene, IFontAdapter fontAdapter, Color color)
+        : this(text, scene, fontAdapter, new RenderingOptions(color, true), 0, 0)
+    {
+    }
+
+    /// <summary>
+    ///     Initializes a new instance of the <c>Label</c> class.
+    /// </summary>
+    /// <param name="text">The text to be shown on the specified scene.</param>
+    /// <param name="scene">The scene on which the text should be shown.</param>
+    /// <param name="fontAdapter">The <see cref="SpriteFont" /> instance.</param>
+    /// <param name="options">The <see cref="RenderingOptions" /> that specifies the options for rendering the static label.</param>
+    /// <param name="x">The X coordinate of the text position.</param>
+    /// <param name="y">The Y coordinate of the text position.</param>
+    public Label(string text, IScene scene, IFontAdapter fontAdapter, RenderingOptions options, float x, float y)
+        : base(scene, null, x, y)
+    {
+        _fontAdapter = fontAdapter;
+        Text = text;
+        Collidable = false;
+        Options = options;
+        _textSize = fontAdapter.MeasureString(text);
     }
 
     #endregion Public Constructors
@@ -122,16 +205,26 @@ public class Label : VisibleComponent
     /// </summary>
     /// <remarks>
     ///     If <c>CenterScreen</c> property of <see cref="RenderingOptions" /> has been set to true,
-    ///     this property will return the calculated X and Y coordinates. Otherwise, the user-specified
-    ///     X and Y values will be returned.
+    ///     this property will return the calculated X and Y coordinates. Otherwise, the X and Y values
+    ///     will be determined by whether the xCoordCallback and yCoordCallback constructor parameters
+    ///     were set during the initialization of the current instance. If both callback functions were specified,
+    ///     the X and Y value will be calculated with these callback functions, otherwise, user-specified
+    ///     coordinates will be used.
     /// </remarks>
     protected Vector2 DrawingPosition
     {
         get
         {
             if (Options.CenterScreen)
+            {
                 return new Vector2((Scene.Viewport.Width - _textSize.X) / 2,
                     (Scene.Viewport.Height - _textSize.Y) / 2);
+            }
+
+            if (Options.CenterHorizontally)
+            {
+                return new Vector2((Scene.Viewport.Width - _textSize.X) / 2, Y);
+            }
 
             return new Vector2(X, Y);
         }
@@ -144,9 +237,9 @@ public class Label : VisibleComponent
     /// <inheritdoc />
     protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        spriteBatch.Begin();
-        spriteBatch.DrawString(_font, Text, DrawingPosition, Options.Color);
-        spriteBatch.End();
+        //spriteBatch.Begin();
+        spriteBatch.DrawString(_fontAdapter, Text, DrawingPosition, Options.Color);
+        //spriteBatch.End();
     }
 
     #endregion Protected Methods
@@ -183,6 +276,12 @@ public class Label : VisibleComponent
             Color = color;
         }
 
+        public RenderingOptions(Color color, bool centerScreen, bool centerHorizontally)
+            : this(color, centerScreen)
+        {
+            CenterHorizontally = centerHorizontally;
+        }
+
         #endregion Public Constructors
 
         #region Public Properties
@@ -192,6 +291,8 @@ public class Label : VisibleComponent
         ///     should be put at the center of the current <see cref="Viewport" />.
         /// </summary>
         public bool CenterScreen { get; } = false;
+
+        public bool CenterHorizontally { get; } = false;
 
         /// <summary>
         ///     Gets the static label color.

@@ -29,26 +29,17 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+namespace Mfx.Core.Elements.Menus;
 
-namespace Mfx.Core.Sprites;
-
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+/// <summary>
+/// Represents a menu item in a menu.
+/// </summary>
+/// <param name="Name">The name of the menu item, usually it will be used as an identifier.</param>
+/// <param name="Text">The text of the menu item shown on the screen.</param>
+public record MenuItem(string Name, string Text)
 {
-    #region Protected Methods
-
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
-    }
-
-    #endregion Protected Methods
+    /// <summary>
+    /// Gets or sets a <see cref="bool"/> value which indicates if the menu item is enabled.
+    /// </summary>
+    public bool Enabled { get; set; } = true;
 }

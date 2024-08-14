@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mfx.Core", "Mfx.Core\Mfx.Core.csproj", "{ACA8A53E-CCE7-4199-908D-620BEB7B9308}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mfx.Samples", "Mfx.Samples\Mfx.Samples.csproj", "{AA7DF0A0-1659-4E25-9515-1EB7A9E5DE37}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mfx.Samples", "Mfx.Samples\Mfx.Samples.csproj", "{AA7DF0A0-1659-4E25-9515-1EB7A9E5DE37}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mfx.Extended.FontStashSharp", "Mfx.Extended.FontStashSharp\Mfx.Extended.FontStashSharp.csproj", "{A2F81386-46FD-4F63-BA5F-9F3796B521B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{AA7DF0A0-1659-4E25-9515-1EB7A9E5DE37}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA7DF0A0-1659-4E25-9515-1EB7A9E5DE37}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA7DF0A0-1659-4E25-9515-1EB7A9E5DE37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2F81386-46FD-4F63-BA5F-9F3796B521B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2F81386-46FD-4F63-BA5F-9F3796B521B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2F81386-46FD-4F63-BA5F-9F3796B521B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2F81386-46FD-4F63-BA5F-9F3796B521B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

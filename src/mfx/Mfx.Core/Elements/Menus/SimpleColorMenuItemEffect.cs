@@ -29,26 +29,33 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
+using Mfx.Core.Fonts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Sprites;
+namespace Mfx.Core.Elements.Menus;
 
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+/// <summary>
+///     Represents the menu item effect that renders menu items with simple colors.
+/// </summary>
+/// <param name="menuItemColor">The color of the menu item in a clickable state.</param>
+/// <param name="hoverColor">The color of the menu item when mouse cursor hovers over it.</param>
+/// <param name="disabledColor">The color of the menu item when it is disabled.</param>
+public sealed class SimpleColorMenuItemEffect(Color menuItemColor, Color hoverColor, Color disabledColor)
+    : MenuItemEffect
 {
-    #region Protected Methods
+    #region Public Methods
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
+    /// <inheritdoc />
+    public override void DrawMenuItem(bool hovering, SpriteBatch spriteBatch, IFontAdapter menuItemFontAdapter,
+        MenuItem menuItem,
+        Rectangle menuItemRect, Rectangle menuRect)
     {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
+        spriteBatch.DrawString(menuItemFontAdapter,
+            menuItem.Text,
+            new Vector2(menuItemRect.X, menuItemRect.Y),
+            menuItem.Enabled ? hovering ? hoverColor : menuItemColor : disabledColor);
     }
 
-    #endregion Protected Methods
+    #endregion Public Methods
 }

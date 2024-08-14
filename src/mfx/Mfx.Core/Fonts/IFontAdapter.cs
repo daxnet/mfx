@@ -29,26 +29,33 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Sprites;
+namespace Mfx.Core.Fonts;
 
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+/// <summary>
+///     Represents that the implemented classes are font adapters.
+/// </summary>
+public interface IFontAdapter
 {
-    #region Protected Methods
+    #region Public Methods
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
-    }
+    /// <summary>
+    ///     Draws a text string at the specified position with the specified color.
+    /// </summary>
+    /// <param name="spriteBatch">The <see cref="SpriteBatch" /> used for drawing.</param>
+    /// <param name="text">The text to be drawn</param>
+    /// <param name="position">The position at where the text should be drawn.</param>
+    /// <param name="color">The text drawing color.</param>
+    void DrawString(SpriteBatch spriteBatch, string text, Vector2 position, Color color);
 
-    #endregion Protected Methods
+    /// <summary>
+    ///     Measures the size of a string text with the current font.
+    /// </summary>
+    /// <param name="text">The text to be measured.</param>
+    /// <returns>A <see cref="Vector2" /> instance which represents the size of the text.</returns>
+    Vector2 MeasureString(string text);
+
+    #endregion Public Methods
 }

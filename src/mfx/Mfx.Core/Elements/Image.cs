@@ -29,19 +29,26 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Messaging;
+using Mfx.Core.Scenes;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Elements.Messages;
+namespace Mfx.Core.Elements;
 
-public sealed class MenuItemClickedMessage(string menuItem, float x, float y) : Message
+/// <summary>
+/// Represents a static 2D image.
+/// </summary>
+public class Image(IScene scene, Texture2D? texture) : VisibleComponent(scene, texture)
 {
-    #region Public Properties
 
-    public string MenuItem { get; } = menuItem;
+    #region Protected Methods
 
-    public float X { get; } = x;
+    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
+    {
+        //spriteBatch.Begin();
+        spriteBatch.Draw(Texture, new Rectangle(0, 0, Scene.Viewport.Width, Scene.Viewport.Height), Color.White);
+        //spriteBatch.End();
+    }
 
-    public float Y { get; } = y;
-
-    #endregion Public Properties
+    #endregion Protected Methods
 }

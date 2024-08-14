@@ -31,12 +31,21 @@
 
 namespace Mfx.Core.Messaging;
 
+/// <summary>
+///     Represents a message in the Mfx game system.
+/// </summary>
 public interface IMessage
 {
     #region Public Properties
 
+    /// <summary>
+    ///     Gets the unique ID of the message.
+    /// </summary>
     Guid Id { get; }
 
+    /// <summary>
+    ///     Gets the date and time when the message has been created.
+    /// </summary>
     DateTime Timestamp { get; }
 
     #endregion Public Properties

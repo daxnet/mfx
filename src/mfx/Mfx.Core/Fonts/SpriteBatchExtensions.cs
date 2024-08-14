@@ -29,26 +29,18 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Sprites;
+namespace Mfx.Core.Fonts;
 
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+public static class SpriteBatchExtensions
 {
-    #region Protected Methods
+    #region Public Methods
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
-    }
+    public static void DrawString(this SpriteBatch spriteBatch, IFontAdapter fontAdapter, string text,
+        Vector2 position, Color color) =>
+        fontAdapter.DrawString(spriteBatch, text, position, color);
 
-    #endregion Protected Methods
+    #endregion Public Methods
 }

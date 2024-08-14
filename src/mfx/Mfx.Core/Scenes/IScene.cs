@@ -76,12 +76,12 @@ public interface IScene : ICollection<IComponent>, IComponent, IDrawable, IMessa
     /// <summary>
     ///     A callback method that is executed each time when the current scene is going to be the active scene of the game.
     /// </summary>
-    void Enter();
+    void Enter(object? args = null);
 
     /// <summary>
     ///     A callback method that is executed each time when the current scene is going to be an inactive scene of the game.
     /// </summary>
-    void Leave();
+    void Leave(bool closing = false);
 
     /// <summary>
     ///     Loads the required contents for the current scene to run.

@@ -29,26 +29,36 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
+using FontStashSharp;
+using Mfx.Core.Fonts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Mfx.Core.Sprites;
+namespace Mfx.Extended.FontStashSharp;
 
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+public sealed class FontStashSharpAdapter : IFontAdapter
 {
-    #region Protected Methods
+    #region Private Fields
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
+    private readonly DynamicSpriteFont _spriteFont;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
+    public FontStashSharpAdapter(DynamicSpriteFont spriteFont)
     {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
+        _spriteFont = spriteFont;
     }
 
-    #endregion Protected Methods
+    #endregion Public Constructors
+
+    #region Public Methods
+
+    public void DrawString(SpriteBatch spriteBatch, string text, Vector2 position, Color color)
+        => spriteBatch.DrawString(_spriteFont, text, position, color);
+
+    public Vector2 MeasureString(string text) => _spriteFont.MeasureString(text);
+
+    #endregion Public Methods
 }

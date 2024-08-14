@@ -40,7 +40,6 @@ namespace Mfx.Core.Scenes;
 
 public abstract class Scene(MfxGame game, string name, Color backgroundColor) : IScene
 {
-
     #region Private Fields
 
     private readonly ConcurrentDictionary<Guid, IComponent> _components = new();
@@ -73,9 +72,27 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
 
     #region Public Methods
 
-    public void Add(IComponent item) => _components.TryAdd(item.Id, item);
+    public void Add(IComponent item)
+    {
+        if (_components.TryAdd(item.Id, item) &&
+            item is IVisibleComponent visibleComponent)
+        {
+            visibleComponent.OnAddedToScene(this);
+        }
+    }
 
-    public void Clear() => _components.Clear();
+    public void Clear()
+    {
+        Parallel.ForEach(_components.Values, component =>
+        {
+            if (component is IVisibleComponent visibleComponent)
+            {
+                visibleComponent.OnRemovedFromScene(this);
+            }
+        });
+
+        _components.Clear();
+    }
 
     public bool Contains(IComponent item)
     {
@@ -105,7 +122,7 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
         }
     }
 
-    public virtual void Enter()
+    public virtual void Enter(object? args = null)
     {
     }
 
@@ -128,7 +145,7 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
 
     IEnumerator IEnumerable.GetEnumerator() => _components.Values.GetEnumerator();
 
-    public virtual void Leave()
+    public virtual void Leave(bool closing = false)
     {
     }
 
@@ -141,9 +158,23 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
     }
 
     public void Publish<TMessage>(TMessage message) where TMessage : IMessage =>
-            Game.MessageDispatcher.Dispatch(this, message);
+        Game.MessageDispatcher.Dispatch(this, message);
 
-    public bool Remove(IComponent item) => _components.TryRemove(item.Id, out _);
+    public bool Remove(IComponent item)
+    {
+        var result = _components.TryRemove(item.Id, out var removedComponent);
+        if (removedComponent is IVisibleComponent visibleComponent)
+        {
+            visibleComponent.OnRemovedFromScene(this);
+        }
+
+        if (removedComponent is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+
+        return result;
+    }
 
     public void Resume()
     {
@@ -152,7 +183,7 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
     }
 
     public void Subscribe<TMessage>(Action<object, TMessage> handler) where TMessage : IMessage =>
-            Game.MessageDispatcher.RegisterHandler(handler);
+        Game.MessageDispatcher.RegisterHandler(handler);
 
     public virtual void Update(GameTime gameTime)
     {
@@ -164,16 +195,8 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
                 .AsParallel()
                 .ForAll(component => component.Update(gameTime));
 
-            var inactiveComponentIdList = _components.Values.Where(component => !component.IsActive)
-                .Select(component => component.Id);
-            Parallel.ForEach(inactiveComponentIdList, id =>
-            {
-                _components.TryRemove(id, out var component);
-                if (component is IDisposable disposable)
-                {
-                    disposable.Dispose();
-                }
-            });
+            var inactiveComponents = _components.Values.Where(component => !component.IsActive);
+            Parallel.ForEach(inactiveComponents, component => { Remove(component); });
         }
     }
 
@@ -189,6 +212,16 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
         }
     }
 
+    protected T GameAs<T>() where T : MfxGame
+    {
+        if (Game is T g)
+        {
+            return g;
+        }
+
+        throw new InvalidCastException($"Current Game instance can't be casted to {typeof(T).Name}.");
+    }
+
     protected virtual void OnPaused()
     {
     }
@@ -198,5 +231,4 @@ public abstract class Scene(MfxGame game, string name, Color backgroundColor) : 
     }
 
     #endregion Protected Methods
-
 }

@@ -29,9 +29,12 @@
 // SOFTWARE.
 // =============================================================================
 
+using System.Collections.Generic;
 using Mfx.Core;
 using Mfx.Core.Elements;
-using Mfx.Core.Elements.Messages;
+using Mfx.Core.Elements.InputConfiguration;
+using Mfx.Core.Elements.Menus;
+using Mfx.Core.Fonts;
 using Mfx.Core.Scenes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -39,7 +42,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Mfx.Samples.ElementsDemo;
 
-internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game, name, Color.CornflowerBlue)
+internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game, name, Color.Black)
 {
     #region Private Fields
 
@@ -47,6 +50,7 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
     private Menu? _menu;
     private SpriteFont? _menuFont;
     private Label? _selectedMenuTextLabel;
+    private InputConfigPanel? _inputConfigPnl;
 
     #endregion Private Fields
 
@@ -57,28 +61,41 @@ internal sealed class ElementsDemoScene(MfxGame game, string name) : Scene(game,
         _labelFont = contentManager.Load<SpriteFont>("arial");
         _menuFont = contentManager.Load<SpriteFont>("times_menu");
 
-        _menu = new Menu(this, _menuFont, ["New Game", "Options", "Load From Existing Saving", "Exit"], 100, 200,
-            Color.White, Color.Red);
+        _menu = new Menu(this, _menuFont, [
+            new MenuItem("mnuNewGame", "New Game"),
+            new MenuItem("mnuOptions", "Options"),
+            new MenuItem("mnuResetKeys", "Reset Keys"),
+            new MenuItem("mnuLoadExistingSaving", "Load From Existing Saving") { Enabled = false },
+            new MenuItem("mnuExit", "Exit")
+        ], 100, 200, Color.White, Color.Red, Color.Gray);
 
         _selectedMenuTextLabel = new Label("", this, _labelFont, 0, 25, Color.Yellow);
+        _inputConfigPnl = new InputConfigPanel(this, new SpriteFontAdapter(_menuFont),
+            ["Up", "Down", "Left", "Right"], 500, 200, 270, Color.YellowGreen, Color.Brown);
 
         Add(new Label("This is a static label.", this, _labelFont, 0, 0, Color.Yellow));
         Add(_selectedMenuTextLabel);
         Add(_menu);
+        Add(_inputConfigPnl);
 
-        Subscribe<MenuItemClickedMessage>((publisher, message) =>
+        Subscribe<MenuItemClickedMessage>((_, message) =>
         {
-            // _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
-            var nextSceneName = message.MenuItem switch
+            if (message.MenuItemName == "mnuResetKeys")
             {
-                "New Game" => "NewGameScene",
-                "Exit" => "Exit",
+                _inputConfigPnl.Reset();
+                return;
+            }
+            // _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
+            var nextSceneName = message.MenuItemName switch
+            {
+                "mnuNewGame" => "NewGameScene",
+                "mnuExit" => "Exit",
                 _ => null
             };
 
             if (nextSceneName is null)
             {
-                _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItem}";
+                _selectedMenuTextLabel.Text = $"Selected Menu Item: {message.MenuItemName}";
             }
             else if (nextSceneName == "Exit")
             {

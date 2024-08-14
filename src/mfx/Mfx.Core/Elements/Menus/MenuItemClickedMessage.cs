@@ -29,26 +29,19 @@
 // SOFTWARE.
 // =============================================================================
 
-using Mfx.Core.Scenes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using Mfx.Core.Messaging;
 
-namespace Mfx.Core.Sprites;
+namespace Mfx.Core.Elements.Menus;
 
-public class Sprite(IScene scene, Texture2D? texture, float x, float y) : VisibleComponent(scene, texture, x, y)
+public sealed class MenuItemClickedMessage(string menuItemName, float x, float y) : Message
 {
-    #region Protected Methods
+    #region Public Properties
 
-    protected override void ExecuteDraw(GameTime gameTime, SpriteBatch spriteBatch)
-    {
-        if (Texture is not null)
-        {
-            // TODO: Refine the spriteBatch invocation.
-            //spriteBatch.Begin();
-            spriteBatch.Draw(Texture, new Vector2(X, Y), Color.White);
-            //spriteBatch.End();
-        }
-    }
+    public string MenuItemName { get; } = menuItemName;
 
-    #endregion Protected Methods
+    public float X { get; } = x;
+
+    public float Y { get; } = y;
+
+    #endregion Public Properties
 }

@@ -35,9 +35,9 @@ namespace Mfx.Samples.ElementsDemo
         {
            
             base.Draw(gameTime, spriteBatch);
-            spriteBatch.Begin();
+            //spriteBatch.Begin();
             spriteBatch.DrawString(_font, "This is the game scene. Press ENTER to go back.", Vector2.Zero, Color.Yellow);
-            spriteBatch.End();
+            //spriteBatch.End();
         }
     }
 }

@@ -29,56 +29,48 @@
 // SOFTWARE.
 // =============================================================================
 
-namespace Mfx.Core;
+using Microsoft.Xna.Framework.Input;
 
-public sealed class MfxGameSettings
+namespace Mfx.Core.Input;
+
+/// <summary>
+///     Represents the extension methods that extend the existing <see cref="KeyboardState" /> object.
+/// </summary>
+public static class KeyboardStateExtensions
 {
-
-    #region Public Fields
-
-    public static readonly MfxGameSettings FullScreen = new()
-    {
-        IsFullScreen = true
-    };
-
-    public static readonly MfxGameSettings NormalScreenShowMouse = new()
-    {
-        AllowResizing = true,
-        Width = DefaultWidth,
-        Height = DefaultHeight,
-        IsFullScreen = false,
-        MouseVisible = true
-    };
-
-    #endregion Public Fields
-
     #region Private Fields
 
-    private const int DefaultHeight = 768;
-    private const string DefaultTitle = "MfxGame";
-    private const int DefaultWidth = 1024;
+    private static readonly Dictionary<Keys, bool> _keyHeldState = new();
 
     #endregion Private Fields
 
-    #region Public Properties
-
-    public bool AllowResizing { get; set; }
-    public int Height { get; set; }
-    public bool IsFullScreen { get; set; }
-
-    public bool MouseVisible { get; set; }
-    public string Title { get; set; } = DefaultTitle;
-    public int Width { get; set; }
-
-    #endregion Public Properties
-
     #region Public Methods
 
-    public static MfxGameSettings DefaultWithTitle(string title)
+    /// <summary>
+    ///     An extension method which checks if a key has been pressed once.
+    /// </summary>
+    /// <param name="state">The <see cref="KeyboardState" /> instance to be extended.</param>
+    /// <param name="keys">The <see cref="Keys" /> to be checked.</param>
+    /// <returns>True if the key has been pressed once, otherwise, false.</returns>
+    public static bool HasPressedOnce(this KeyboardState state, Keys keys)
     {
-        var result = NormalScreenShowMouse;
-        result.Title = title;
-        return result;
+        if (state.IsKeyDown(keys))
+        {
+            if (_keyHeldState.TryGetValue(keys, out var v1) && v1)
+            {
+                return false;
+            }
+
+            _keyHeldState.TryAdd(keys, true);
+            return true;
+        }
+
+        if (_keyHeldState.TryGetValue(keys, out var v2) && v2)
+        {
+            _keyHeldState.Remove(keys);
+        }
+
+        return false;
     }
 
     #endregion Public Methods
